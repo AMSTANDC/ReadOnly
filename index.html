@@ -1424,7 +1424,7 @@ let mBarInst = null, mPieInst = null;
 function loadSitesMeta()   { try { return JSON.parse(localStorage.getItem('ams_mgr_sites')||'[]'); } catch { return []; } }
 function saveSitesMeta(s)  {
   try {
-    localStorage.setItem('ams_mgr_sites', JSON.stringify(s.map(s=>({id:s.id,name:s.name,code:s.code,scriptUrl:s.scriptUrl||'',wufooFormId:s.wufooFormId||'',poiUrl:s.poiUrl||'',data:[],ppeData:[],lastLoaded:s.lastLoaded||null}))));
+    localStorage.setItem('ams_mgr_sites', JSON.stringify(s.map(s=>({id:s.id,name:s.name,code:s.code,scriptUrl:s.scriptUrl||'',wufooFormId:s.wufooFormId||'',maintenanceWufooFormId:s.maintenanceWufooFormId||'',poiUrl:s.poiUrl||'',data:[],ppeData:[],lastLoaded:s.lastLoaded||null}))));
   } catch(e) {
     console.error('saveSitesMeta FAILED (storage full):', e.message);
     showToast('⚠ Storage is full — site list could not be saved. Use Admin → Sites → Clear Local Cache.', 'error');
@@ -2191,6 +2191,17 @@ function fmtWufooVal(val) {
 
 let _wufooScriptUrl = localStorage.getItem('ams_wufoo_script_url') || '';
 
+// A site can have two separate Wufoo forms — security and maintenance.
+// Maintenance is a real, guard-selected incident type already, so it's
+// used as the signal for which form a given record's report lives in —
+// falls back to the security form if no maintenance form is configured.
+function getWufooFormIdForRecord(site, record) {
+  if (!site) return '';
+  const isMaintenance = (record?.type || '').trim().toLowerCase() === 'maintenance';
+  if (isMaintenance && site.maintenanceWufooFormId) return site.maintenanceWufooFormId;
+  return site.wufooFormId || '';
+}
+
 async function openWufooReport(siteCode, entryId, formId) {
   if (!_wufooScriptUrl) {
     const url = prompt('Enter your Google Apps Script URL (same one used for Drive sync):');
@@ -2632,10 +2643,10 @@ function renderLog() {
     const [y,m,d]=r.date.split('-');
     const typeCol = isSignOff ? 'color:#d85a30;' : isSignOn ? 'color:#5DCAA5;' : '';
     const site = getActiveSite();
-    const entryIdMatch = site?.wufooFormId && r.ref ? String(r.ref).trim().match(/\d+/)?.[0] : null;
+    const entryIdMatch = (site?.wufooFormId || site?.maintenanceWufooFormId) && r.ref ? String(r.ref).trim().match(/\d+/)?.[0] : null;
     const wfLink   = wufooLink(site, r.ref);
     const refCell = entryIdMatch
-      ? `<a href="#" onclick="event.stopPropagation();event.preventDefault();openWufooReport('${site.code}','${entryIdMatch}','${site.wufooFormId}');" style="color:#5DCAA5;text-decoration:underline;font-weight:600;" title="Open readable report">${r.ref}</a>`
+      ? `<a href="#" onclick="event.stopPropagation();event.preventDefault();openWufooReport('${site.code}','${entryIdMatch}','${getWufooFormIdForRecord(site, r)}');" style="color:#5DCAA5;text-decoration:underline;font-weight:600;" title="Open readable report">${r.ref}</a>`
       : wfLink
       ? `<a href="${wfLink}" target="_blank" onclick="event.stopPropagation();" style="color:#d85a30;text-decoration:underline;font-weight:600;" title="Open source entry">${r.ref}</a>`
       : (r.ref||'—');
@@ -3433,15 +3444,24 @@ function renderSitesSettings() {
       <div style="background:rgba(216,90,48,0.06);border:1px solid rgba(216,90,48,0.2);border-radius:8px;padding:14px 16px;margin-top:10px;">
         <div style="font-size:12px;font-weight:700;color:#d85a30;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">&#128279; Wufoo Entry Link</div>
         <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6;">
-          Enter this site's Wufoo Form ID to make Reference numbers in the log clickable, opening the matching Wufoo entry directly.
+          Enter this site's Wufoo Form ID(s) to make Reference numbers in the log clickable. A Maintenance-type incident's Ref automatically uses the Maintenance form below (if set); everything else uses the Security form.
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+          <label style="font-size:11px;color:var(--text3);width:90px;">Security</label>
           <input type="text" id="wufoo-id-${s.id}" value="${s.wufooFormId||''}" placeholder="e.g. 39"
             style="width:120px;padding:7px 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;">
           <button class="btn btn-outline btn-sm" style="color:#d85a30;border-color:rgba(216,90,48,0.3);"
             onclick="saveWufooFormId('${s.id}')">&#128190; Save</button>
         </div>
-        ${s.wufooFormId ? `<div style="font-size:11px;color:#d85a30;margin-top:8px;">&#10003; Linked to Wufoo Form ${s.wufooFormId}</div>` : '<div style="font-size:11px;color:var(--text3);margin-top:8px;">Not configured</div>'}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <label style="font-size:11px;color:var(--text3);width:90px;">Maintenance</label>
+          <input type="text" id="wufoo-maint-id-${s.id}" value="${s.maintenanceWufooFormId||''}" placeholder="e.g. 63 (optional)"
+            style="width:120px;padding:7px 10px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;">
+          <button class="btn btn-outline btn-sm" style="color:#d85a30;border-color:rgba(216,90,48,0.3);"
+            onclick="saveMaintenanceWufooFormId('${s.id}')">&#128190; Save</button>
+        </div>
+        ${s.wufooFormId ? `<div style="font-size:11px;color:#d85a30;margin-top:8px;">&#10003; Security linked to Form ${s.wufooFormId}</div>` : '<div style="font-size:11px;color:var(--text3);margin-top:8px;">Security: not configured</div>'}
+        ${s.maintenanceWufooFormId ? `<div style="font-size:11px;color:#d85a30;">&#10003; Maintenance linked to Form ${s.maintenanceWufooFormId}</div>` : '<div style="font-size:11px;color:var(--text3);">Maintenance: not configured — Maintenance Refs will use the Security form</div>'}
       </div>
 
       <!-- POI REGISTER LINK -->
@@ -3592,6 +3612,7 @@ function importSiteConfigFile(file) {
       existing.name       = cfg.name.trim();
       existing.scriptUrl  = cfg.scriptUrl     || existing.scriptUrl  || '';
       existing.wufooFormId= cfg.wufooFormId   || existing.wufooFormId|| '';
+      existing.maintenanceWufooFormId = cfg.maintenanceWufooFormId || existing.maintenanceWufooFormId || '';
       existing.poiUrl     = cfg.poiUrl        || existing.poiUrl     || '';
       applyCategories();
       saveSitesMeta(sites);
@@ -3601,7 +3622,7 @@ function importSiteConfigFile(file) {
       showToast(`Updated "${existing.name}" from config file.`, 'success');
       if (existing.scriptUrl) fetchSiteFromScript(existing.id);
     } else {
-      const s = { id: crypto.randomUUID(), name: cfg.name.trim(), code, scriptUrl: cfg.scriptUrl||'', wufooFormId: cfg.wufooFormId||'', poiUrl: cfg.poiUrl||'', data: [], ppeData: [], lastLoaded: null };
+      const s = { id: crypto.randomUUID(), name: cfg.name.trim(), code, scriptUrl: cfg.scriptUrl||'', wufooFormId: cfg.wufooFormId||'', maintenanceWufooFormId: cfg.maintenanceWufooFormId||'', poiUrl: cfg.poiUrl||'', data: [], ppeData: [], lastLoaded: null };
       applyCategories();
       sites.push(s);
       saveSitesMeta(sites);
@@ -3637,6 +3658,9 @@ async function fetchSiteFromScript(siteId) {
     site.lastLoaded = new Date().toISOString();
     if (d.siteConfig?.wufooFormId && !site.wufooFormId) {
       site.wufooFormId = d.siteConfig.wufooFormId;
+    }
+    if (d.siteConfig?.maintenanceWufooFormId && !site.maintenanceWufooFormId) {
+      site.maintenanceWufooFormId = d.siteConfig.maintenanceWufooFormId;
     }
     if (d.siteConfig?.poiUrl && !site.poiUrl) {
       site.poiUrl = d.siteConfig.poiUrl;
@@ -3680,6 +3704,18 @@ function saveWufooFormId(siteId) {
   renderLog();
   showToast(formId ? 'Wufoo Form ID saved — Ref numbers are now clickable' : 'Wufoo Form ID cleared', 'success');
   if (site.scriptUrl) saveBackToFile(siteId).catch(e => console.warn('Wufoo Form ID cloud push failed:', e));
+}
+
+function saveMaintenanceWufooFormId(siteId) {
+  const site = sites.find(s => s.id === siteId);
+  if (!site) return;
+  const formId = (document.getElementById('wufoo-maint-id-' + siteId)?.value || '').trim();
+  site.maintenanceWufooFormId = formId;
+  saveSitesMeta(sites);
+  renderSitesSettings();
+  renderLog();
+  showToast(formId ? 'Maintenance Wufoo Form ID saved — Maintenance Refs now link there' : 'Maintenance Wufoo Form ID cleared', 'success');
+  if (site.scriptUrl) saveBackToFile(siteId).catch(e => console.warn('Maintenance Wufoo Form ID cloud push failed:', e));
 }
 
 function savePoiUrl(siteId) {
@@ -5998,6 +6034,7 @@ async function saveBackToFile(id) {
         deletedIds:          JSON.parse(localStorage.getItem('ams_deleted_ids_'+id)||'[]'),
         siteConfig: {
           wufooFormId: site.wufooFormId || '',
+          maintenanceWufooFormId: site.maintenanceWufooFormId || '',
           poiUrl: site.poiUrl || '',
         },
       };
