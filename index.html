@@ -238,114 +238,6 @@ table.log-tbl{width:100%;border-collapse:collapse;font-size:13px;}
   .site-sel-bar{padding:8px 16px;}
 }
 
-/* ════════════════════════════════════════════════════════════
-   PHONE (≤700px) — cards, stacking, table→card conversion
-   ════════════════════════════════════════════════════════════ */
-@media(max-width:700px){
-  html,body{overflow-x:hidden;}
-  .main{padding:14px;max-width:100%;}
-  .page-hdr{margin-bottom:16px;}
-  .page-title{font-size:18px;}
-  .page-sub{font-size:11px;}
-
-  /* Action tiles / overview */
-  .dk-action-tiles{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px;}
-  .dk-action-tile{padding:14px 8px;}
-  .dk-at-icon{font-size:20px;}
-  .dk-at-label{font-size:11px;}
-  .dk-overview-bar{padding:12px 14px;gap:10px;}
-  .dk-ov-val{font-size:22px;}
-  .dk-section-hdr{font-size:12px;}
-
-  /* KPI / site grids */
-  .kpi-grid{gap:8px;}
-  .kpi-value{font-size:24px;}
-  .site-grid{gap:8px;}
-  .site-stats{gap:4px;}
-
-  /* Site selector chip bar — scroll horizontally inside its own
-     lane instead of overflowing the whole page */
-  .site-sel-bar{padding:8px 14px;flex-wrap:wrap;}
-  #site-chips{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
-
-  /* Forms / settings */
-  .settings-card{padding:16px 14px;}
-  .field-row label{min-width:0;width:100%;}
-  .toolbar,.dk-toolbar{gap:8px;}
-  .toolbar select,.toolbar input,.dk-toolbar select,.dk-toolbar input{min-width:0;width:100%;}
-
-  /* Charts stay inside their wrapper */
-  canvas{max-width:100%!important;}
-  div[style*="height:280px"]{height:220px!important;}
-
-  /* Collapse simple inline 2/3-column grids used by modals & inline
-     forms (rendered via JS template strings) to a single column */
-  [style*="grid-template-columns:1fr 1fr"],
-  [style*="grid-template-columns: 1fr 1fr"]{
-    grid-template-columns:1fr!important;
-  }
-  .mgr-detail-grid{grid-template-columns:1fr!important;}
-  .mgr-detail-field:nth-child(odd){border-right:none!important;}
-  .mgr-detail-field{padding:8px 0;}
-  .mgr-detail-hdr,.mgr-detail-body,.mgr-detail-footer{padding-left:14px;padding-right:14px;}
-
-  /* ── DENSE DATA TABLES → STACKED CARDS ──
-     thead is dropped and each row becomes a bordered card; every
-     <td> gets a bold label (from data-label, set at runtime by
-     enhanceTablesForMobile()) on the left and its value on the right. */
-  table:not([data-no-card]){display:block;width:100%;}
-  table:not([data-no-card]) thead{display:none;}
-  table:not([data-no-card]) tbody{display:block;width:100%;}
-  table:not([data-no-card]) tr{
-    display:block;width:100%;margin-bottom:10px;
-    background:var(--white);border:1px solid var(--border);
-    border-radius:var(--radius);box-shadow:var(--shadow);
-    padding:4px 12px;overflow:hidden;
-  }
-  table:not([data-no-card]) td{
-    display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
-    width:100%;padding:7px 0;border:none!important;
-    text-align:right;white-space:normal;word-break:break-word;
-  }
-  table:not([data-no-card]) td:not(:last-child){border-bottom:1px solid var(--border)!important;}
-  table:not([data-no-card]) td:empty{display:none;}
-  table:not([data-no-card]) td::before{
-    content:attr(data-label);
-    font-weight:600;color:var(--text2);text-align:left;
-    flex-shrink:0;padding-right:10px;
-  }
-  /* Dark-themed tables (overview log, monthly/YTD report tables, etc.) */
-  .dark-panel table:not([data-no-card]) tr,
-  table.dk-log-tbl:not([data-no-card]) tr,
-  table.dk-rtbl:not([data-no-card]) tr{
-    background:var(--dk-bg3);border-color:var(--dk-border);
-  }
-  .dark-panel table:not([data-no-card]) td:not(:last-child),
-  table.dk-log-tbl:not([data-no-card]) td:not(:last-child),
-  table.dk-rtbl:not([data-no-card]) td:not(:last-child){
-    border-bottom:1px solid var(--dk-border)!important;
-  }
-  .dark-panel table:not([data-no-card]) td::before,
-  table.dk-log-tbl:not([data-no-card]) td::before,
-  table.dk-rtbl:not([data-no-card]) td::before{
-    color:var(--dk-text3);
-  }
-}
-
-/* ═════════════════════════════════════════════════════════
-   SMALL PHONE (≤480px) — header must not wrap/overflow
-   ═════════════════════════════════════════════════════════ */
-@media(max-width:480px){
-  header{gap:8px;padding:0 12px;}
-  header img{height:34px!important;}
-  .hdr-sub{display:none;}
-  .hdr-main{font-size:16px;}
-  .hdr-clock{display:none;}
-  #theme-toggle{padding:6px 10px!important;font-size:14px!important;}
-  .nav-tab{padding:11px 12px;font-size:12px;}
-  .dk-at-label{font-size:10.5px;}
-}
-
 /* ── DARK PANEL (Overview + Log) ── */
 :root{
   --dk-bg:     #0f1923;
@@ -1270,11 +1162,51 @@ const OPERATIONAL_KEYWORDS = [
   'comms book','communication book','management dut','fire isolation',
 ];
 
-function isExcluded(type) {
+// Per-site overrides — some sites report a type that's operational/excluded
+// everywhere else as a genuine, counted incident category in their own
+// official reports. Matches Manager.html's own list exactly.
+const SITE_TYPE_OVERRIDES = {
+  'CHURCHILL': ['Centre Management Duties'],
+};
+const SITE_TYPE_OVERRIDES_LC = Object.fromEntries(
+  Object.entries(SITE_TYPE_OVERRIDES).map(([code, types]) => [code.toLowerCase(), new Set(types.map(t => t.toLowerCase()))])
+);
+
+// Cache of each site's imported "OTHER"-section type names (lowercased),
+// built lazily per site code — matches the same fix applied to Manager.html.
+const _siteOtherTypesCache = {};
+function getSiteOtherTypes(siteCode) {
+  if (!siteCode) return null;
+  const key = siteCode.toUpperCase();
+  if (key in _siteOtherTypesCache) return _siteOtherTypesCache[key];
+  let result = null;
+  try {
+    const raw = localStorage.getItem('ams_entry_cats_' + key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const otherKey = Object.keys(parsed || {}).find(k => k.trim().toUpperCase() === 'OTHER');
+      if (otherKey && Array.isArray(parsed[otherKey])) {
+        result = new Set(parsed[otherKey].map(t => (t||'').toLowerCase()));
+      }
+    }
+  } catch(e) { /* leave as null, falls through to normal exclusion rules */ }
+  _siteOtherTypesCache[key] = result;
+  return result;
+}
+
+function isExcluded(type, siteCode) {
   if (!type) return true;
   const t = type.trim();
   if (!t) return true;
   const tl = t.toLowerCase();
+  // Site-specific override takes priority — if this site counts this type
+  // as a real incident, it's never excluded for that site, full stop.
+  if (siteCode && SITE_TYPE_OVERRIDES_LC[siteCode.toLowerCase()]?.has(tl)) return false;
+  // A site's own imported categories (Other section) take priority next — if
+  // this site's config puts this type under Other, it's excluded for this
+  // site regardless of the shared blacklist below.
+  const siteOther = getSiteOtherTypes(siteCode);
+  if (siteOther && siteOther.has(tl)) return true;
   // Blacklist: exclude known operational/admin entries (case-insensitive).
   if (EXCLUDED_TYPES_LC.has(tl)) return true;
   // Keyword fallback for naming variants not covered above.
@@ -1371,19 +1303,34 @@ function getCatsForSite(data, siteName) {
   // Get all unique incident types in the data (excluding operational entries)
   const typesInData = [...new Set(
     data
-      .filter(r => !isExcluded(r.type))
+      .filter(r => !isExcluded(r.type, r.siteCode))
       .map(r => r.type.trim())
   )].sort((a,b) => a.localeCompare(b));
 
-  if (!typesInData.length) return { sections: DEFAULT_CATS, allTypes: [], burnside: false };
+  // A site's own imported categories (from its site_config_*.json, via
+  // Import Site Config) take priority over the shared default list —
+  // matches the same fix applied to Manager.html.
+  const siteCode = (data.length ? (data[0].siteCode || '') : '').toUpperCase();
+  let importedCats = null;
+  if (siteCode) {
+    try {
+      const raw = localStorage.getItem('ams_entry_cats_' + siteCode);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Object.keys(parsed).length) importedCats = parsed;
+      }
+    } catch(e) { /* fall through to defaults below */ }
+  }
+
+  if (!typesInData.length) return { sections: importedCats || DEFAULT_CATS, allTypes: [], burnside: false };
 
   // ── Detect Burnside — check site name first, then data ───────────────────
   const nameToCheck = siteName || (data.length ? (data[0].site || '') : '');
-  const burnside    = nameToCheck.toLowerCase().includes('burnside') || isBurnsideSite(data);
-  const BASE_CATS   = burnside ? BURNSIDE_CATS : DEFAULT_CATS;
-  const SECTION_ORDER = burnside
-    ? ['HIGH PRIORITY','MEDIUM PRIORITY','LOW PRIORITY']
-    : ['GENERAL SECURITY','EMERGENCY RELATED','GUARD INTERVENTION'];
+  const burnside    = !importedCats && (nameToCheck.toLowerCase().includes('burnside') || isBurnsideSite(data));
+  const BASE_CATS   = importedCats || (burnside ? BURNSIDE_CATS : DEFAULT_CATS);
+  const SECTION_ORDER = importedCats
+    ? Object.keys(importedCats)
+    : (burnside ? ['HIGH PRIORITY','MEDIUM PRIORITY','LOW PRIORITY'] : ['GENERAL SECURITY','EMERGENCY RELATED','GUARD INTERVENTION']);
 
   // ── Keyword patterns for fallback classification ──────────────────────────
   const EMERGENCY_KEYWORDS = [
@@ -1419,7 +1366,12 @@ function getCatsForSite(data, siteName) {
     const tl = t.toLowerCase();
     let targetSection;
 
-    if (burnside) {
+    if (importedCats) {
+      const findSection = (needle) => SECTION_ORDER.find(s => s.toUpperCase().includes(needle));
+      if (EMERGENCY_KEYWORDS.some(k => tl.includes(k))) targetSection = findSection('EMERGENCY');
+      if (!targetSection && GUARD_KEYWORDS.some(k => tl.includes(k))) targetSection = findSection('GUARD');
+      if (!targetSection) targetSection = findSection('SECURITY') || SECTION_ORDER[0];
+    } else if (burnside) {
       if (HIGH_KEYWORDS.some(k => tl.includes(k)))        targetSection = 'HIGH PRIORITY';
       else if (MEDIUM_KEYWORDS.some(k => tl.includes(k))) targetSection = 'MEDIUM PRIORITY';
       else if (LOW_KEYWORDS.some(k => tl.includes(k)))    targetSection = 'LOW PRIORITY';
@@ -1534,65 +1486,6 @@ function loadSitePermits(id)      { try { return JSON.parse(localStorage.getItem
 function saveSitePermits(id,d)    { try { localStorage.setItem('ams_site_permit_'+id, JSON.stringify(d)); } catch(e) { console.warn('Permit cache save skipped (storage full):', e.message); } }
 function loadSiteKeys(id)         { try { return JSON.parse(localStorage.getItem('ams_site_keys_'+id)||'[]'); } catch { return []; } }
 function saveSiteKeys(id,d)       { try { localStorage.setItem('ams_site_keys_'+id, JSON.stringify(d)); } catch(e) { console.warn('Keys cache save skipped (storage full):', e.message); } }
-
-// ═══════════════════════════════════════════════════════
-// MOBILE TABLE CARDS
-// Dense report/log tables are rendered dynamically throughout this
-// file via '+=' string-building — there is no static markup to hand
-// edit. This walks the live DOM instead, reads each table's <thead>
-// once, and stamps a matching data-label on every <td> so the
-// @media(max-width:700px) CSS above can render each row as a
-// labelled card on phones. Idempotent (skips rows already labelled)
-// and safe to opt a table out of via a data-no-card attribute.
-// ═══════════════════════════════════════════════════════
-function enhanceTablesForMobile(root) {
-  root = root || document;
-  if (!root.querySelectorAll) return;
-  var tables = root.querySelectorAll('table');
-  tables.forEach(function (table) {
-    if (table.hasAttribute('data-no-card')) return;
-    var headRow = table.querySelector('thead tr');
-    if (!headRow) return; // no header detected — leave table as-is
-    var ths = headRow.querySelectorAll('th');
-    if (!ths.length) return;
-    var labels = [];
-    ths.forEach(function (th) {
-      var span = parseInt(th.getAttribute('colspan') || '1', 10) || 1;
-      var text = (th.textContent || '').replace(/\s+/g, ' ').trim();
-      for (var i = 0; i < span; i++) labels.push(text);
-    });
-    var rows = table.querySelectorAll('tbody tr');
-    rows.forEach(function (tr) {
-      var firstCell = tr.children[0];
-      if (firstCell && firstCell.hasAttribute('data-label')) return; // already processed
-      var col = 0;
-      Array.prototype.forEach.call(tr.children, function (cell) {
-        var span = parseInt(cell.getAttribute('colspan') || '1', 10) || 1;
-        var label = labels[col];
-        if (label) cell.setAttribute('data-label', label);
-        col += span;
-      });
-    });
-  });
-}
-
-(function initMobileTableCards() {
-  var pending = false;
-  function runEnhance() { pending = false; enhanceTablesForMobile(document); }
-  function scheduleEnhance() {
-    if (pending) return;
-    pending = true;
-    setTimeout(runEnhance, 150);
-  }
-  document.addEventListener('DOMContentLoaded', function () { enhanceTablesForMobile(document); });
-  var watchTarget = document.getElementById('content-wrap') || document.body;
-  var tableCardObserver = new MutationObserver(function (mutations) {
-    for (var i = 0; i < mutations.length; i++) {
-      if (mutations[i].addedNodes && mutations[i].addedNodes.length) { scheduleEnhance(); return; }
-    }
-  });
-  tableCardObserver.observe(watchTarget, { childList: true, subtree: true });
-})();
 
 // ═══════════════════════════════════════════════════════
 // INIT
@@ -1744,7 +1637,7 @@ function getActiveSite() { return sites.find(s=>s.id===activeSiteId); }
 function getActiveData()  {
   const s = getActiveSite();
   
-  return s ? (s.data||[]).filter(r=>!isExcluded(r.type)) : [];
+  return s ? (s.data||[]).filter(r=>!isExcluded(r.type, r.siteCode)) : [];
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1764,7 +1657,7 @@ function renderOverview() {
   }
   noSites.style.display = 'none';
 
-  const allIncidents = sites.flatMap(s=>(s.data||[]).filter(r=>!isExcluded(r.type)));
+  const allIncidents = sites.flatMap(s=>(s.data||[]).filter(r=>!isExcluded(r.type, r.siteCode)));
   const allMonths    = getSortedMonths(allIncidents);
   const lastMonth    = allMonths[allMonths.length-1]||'';
   const countWithSecondary = arr => arr.filter(r => !REGISTER_LINKED_TYPES_LC.has((r.type||'').toLowerCase())).reduce((s, r) => s + 1 + (r.secondary && r.secondary !== r.type ? 1 : 0), 0);
@@ -1864,7 +1757,7 @@ function renderOverview() {
   }
 
   [...sites].sort((a,b)=>a.name.localeCompare(b.name)).forEach(s => {
-    const incidents  = (s.data||[]).filter(r=>!isExcluded(r.type));
+    const incidents  = (s.data||[]).filter(r=>!isExcluded(r.type, r.siteCode));
     const months     = getSortedMonths(incidents);
 
     // Use ACTUAL current month, not just last month in data
@@ -2805,7 +2698,7 @@ function populateEmailSiteSelect() {
 function populateEmailMonths() {
   const sid=document.getElementById('email-site')?.value;
   const site=sites.find(s=>s.id===sid);
-  const data=site?(site.data||[]).filter(r=>!isExcluded(r.type)):[];
+  const data=site?(site.data||[]).filter(r=>!isExcluded(r.type, r.siteCode)):[];
   const months=getSortedMonths(data);
   const sel=document.getElementById('email-month');
   if (!sel) return; // Email tab not present in this build
@@ -2822,7 +2715,7 @@ function generateReport() {
   if(!monthStr){showToast('Select a month','error');return;}
   const site = sites.find(s=>s.id===sid);
   if(!site){showToast('Site not found','error');return;}
-  const allData = (site.data||[]).filter(r=>!isExcluded(r.type));
+  const allData = (site.data||[]).filter(r=>!isExcluded(r.type, r.siteCode));
   buildPDFReport(site, allData, monthStr, guards);
 }
 
@@ -3666,10 +3559,12 @@ function addSite() {
 }
 
 // Accepts the exact same per-site JSON config format the entry tool uses.
-// Only connection details are applied here (name, scriptUrl, wufooFormId,
-// poiUrl) — categories are deliberately NOT touched. If a site with this
-// code already exists, its connection details are updated in place rather
-// than creating a duplicate.
+// Connection details are applied as before. Categories are now ALSO
+// imported, stored under the exact same localStorage key the entry tool
+// itself uses (`ams_entry_cats_<CODE>`), matching the same fix applied to
+// Manager.html — so ReadOnly's breakdown genuinely matches the entry tool
+// too, not a separate copy. If a site with this code already exists, its
+// connection details are updated in place rather than creating a duplicate.
 function importSiteConfigFile(file) {
   if (!file) return;
   const reader = new FileReader();
@@ -3680,6 +3575,17 @@ function importSiteConfigFile(file) {
     if (!cfg.code || !cfg.name) { showToast('Config file must include at least a site name and code', 'error'); return; }
 
     const code = (cfg.code || '').trim().toUpperCase();
+
+    const applyCategories = () => {
+      if (cfg.categories && Object.keys(cfg.categories).length) {
+        try {
+          localStorage.setItem('ams_entry_cats_' + code, JSON.stringify(cfg.categories));
+          delete _siteOtherTypesCache[code];
+        }
+        catch(e) { showToast('Categories could not save — device storage may be full', 'error'); }
+      }
+    };
+
     const existing = sites.find(s => s.code === code);
 
     if (existing) {
@@ -3687,6 +3593,7 @@ function importSiteConfigFile(file) {
       existing.scriptUrl  = cfg.scriptUrl     || existing.scriptUrl  || '';
       existing.wufooFormId= cfg.wufooFormId   || existing.wufooFormId|| '';
       existing.poiUrl     = cfg.poiUrl        || existing.poiUrl     || '';
+      applyCategories();
       saveSitesMeta(sites);
       renderSitesSettings();
       renderOverview();
@@ -3695,6 +3602,7 @@ function importSiteConfigFile(file) {
       if (existing.scriptUrl) fetchSiteFromScript(existing.id);
     } else {
       const s = { id: crypto.randomUUID(), name: cfg.name.trim(), code, scriptUrl: cfg.scriptUrl||'', wufooFormId: cfg.wufooFormId||'', poiUrl: cfg.poiUrl||'', data: [], ppeData: [], lastLoaded: null };
+      applyCategories();
       sites.push(s);
       saveSitesMeta(sites);
       activeSiteId = activeSiteId || s.id;
@@ -6432,8 +6340,8 @@ function buildAlerts() {
     }
 
     // Incident spike
-    const thisMth  = data.filter(function(r){ return r.month===thisMonth && !isExcluded(r.type); }).length;
-    const lastMth  = data.filter(function(r){ return r.month===lastMonth && !isExcluded(r.type); }).length;
+    const thisMth  = data.filter(function(r){ return r.month===thisMonth && !isExcluded(r.type, r.siteCode); }).length;
+    const lastMth  = data.filter(function(r){ return r.month===lastMonth && !isExcluded(r.type, r.siteCode); }).length;
     if (lastMth > 0 && thisMth > lastMth * 1.5 && thisMth - lastMth >= 5) {
       alerts.push({ site: site.name, level:'amber', icon:'📈',
         title: 'Incident spike — ' + thisMth + ' this month vs ' + lastMth + ' last month',
@@ -6861,7 +6769,7 @@ async function runBatchReports() {
     if (stat) stat.textContent = 'Generating: '+site.name+' — '+month+' ('+(done+1)+' of '+selectedSites.length+')';
     if (bar)  bar.style.width = Math.round((done/selectedSites.length)*100)+'%';
     
-    const allData = (site.data||[]).filter(r => !isExcluded(r.type));
+    const allData = (site.data||[]).filter(r => !isExcluded(r.type, r.siteCode));
     try { buildPDFReport(site, allData, month, ''); } catch(e) { console.error(e); }
     done++;
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -6961,7 +6869,7 @@ function runMgrExport() {
   let totalRows = 0;
   sitesToExport.forEach(site => {
     let records = (site.data||[]).filter(r => (r.date||'') >= from && (r.date||'') <= to);
-    if (filter === 'incidents') {  records = records.filter(r=>!isExcluded(r.type)); }
+    if (filter === 'incidents') {  records = records.filter(r=>!isExcluded(r.type, r.siteCode)); }
     records.sort((a,b) => (a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
     const rows = records.map(r => ({'Date':r.date||'','Time':r.time||'','Type':r.type||'','Officer':r.officer||'','Location':r.location||'','Details':r.details||'','Report Ref':r.ref||'','Complete':r.complete||'','CMO':r.cmo||'','Month':r.month||'','Site':r.site||site.name}));
     totalRows += rows.length;
