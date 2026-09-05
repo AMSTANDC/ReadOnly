@@ -60,6 +60,14 @@ header{
 .nav-tab:hover{color:var(--dk-text);}
 .nav-tab.active{color:var(--dk-gold);border-bottom-color:var(--dk-gold);}
 
+/* ── REPORTS SUB-NAV ── */
+.reports-sub-nav{display:flex;gap:8px;margin-bottom:18px;}
+.reports-sub-tab{padding:8px 18px;font-size:13px;font-weight:600;color:var(--dk-text3);
+  background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:8px;cursor:pointer;
+  transition:all 0.15s;user-select:none;}
+.reports-sub-tab:hover{color:var(--dk-text);}
+.reports-sub-tab.active{color:#0f1923;background:var(--dk-gold);border-color:var(--dk-gold);}
+
 /* ── PANEL ── */
 .panel{display:none;}
 .panel.active{display:block;}
@@ -355,7 +363,7 @@ body.light-mode .dk-empty { color:#3a4e62!important; }
 .dk-btn.primary:hover{background:#5dcaa5;}
 
 /* Action tiles — top-level actions (replaces nav-bar tabs + per-card buttons) */
-.dk-action-tiles{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:24px;}
+.dk-action-tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
 .dk-action-tile{
   background:#162230;border:1px solid #1e3040;border-radius:10px;
   padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
@@ -590,11 +598,9 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
   <!-- Action tiles -->
   <div class="dk-action-tiles">
     <div class="dk-action-tile" onclick="showTab('log')"><span class="dk-at-icon">📋</span><span class="dk-at-label">Incident Log</span></div>
-    <div class="dk-action-tile" onclick="showTab('monthly')"><span class="dk-at-icon">📊</span><span class="dk-at-label">Monthly</span></div>
-    <div class="dk-action-tile" onclick="showTab('ytd')"><span class="dk-at-icon">📈</span><span class="dk-at-label">YTD</span></div>
+    <div class="dk-action-tile" onclick="showTab('reports')"><span class="dk-at-icon">📊</span><span class="dk-at-label">Reports</span></div>
     <div class="dk-action-tile" onclick="openPOIPicker()"><span class="dk-at-icon">📍</span><span class="dk-at-label">POI</span></div>
     <a class="dk-action-tile" id="policies-tile" href="#" target="_blank" rel="noopener" style="text-decoration:none;"><span class="dk-at-icon">📜</span><span class="dk-at-label">Policies &amp; Procedures</span></a>
-    <a class="dk-action-tile" id="incident-viewer-tile" href="#" target="_blank" rel="noopener" style="text-decoration:none;"><span class="dk-at-icon">📋</span><span class="dk-at-label">Incident Report Viewer</span></a>
     <div class="dk-action-tile" onclick="showTab('admin');renderAdminTab();"><span class="dk-at-icon">⚙</span><span class="dk-at-label">Admin</span></div>
   </div>
 
@@ -632,8 +638,15 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
   </div>
 </div>
 
-<!-- ═══ MONTHLY REPORT ═══ -->
-<div class="panel dark-panel" id="panel-monthly" style="background:var(--dk-bg);min-height:calc(100vh - 110px);padding:24px 32px;">
+<!-- ═══ REPORTS (MONTHLY + YTD) ═══ -->
+<div class="panel dark-panel" id="panel-reports" style="background:var(--dk-bg);min-height:calc(100vh - 110px);padding:24px 32px;">
+
+  <div class="reports-sub-nav">
+    <div class="reports-sub-tab active" id="reports-tab-monthly" onclick="showReportsSub('monthly',this)">📊 Monthly</div>
+    <div class="reports-sub-tab" id="reports-tab-ytd" onclick="showReportsSub('ytd',this)">📈 YTD</div>
+  </div>
+
+  <div id="reports-monthly-view">
   <div style="padding:16px 32px 0;flex-shrink:0;">
   <div class="page-hdr" style="margin-bottom:16px;">
     <div>
@@ -676,22 +689,26 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
 
   <!-- Historical Comparison Table -->
   <div id="historical-section" style="display:none;margin-top:24px;">
-    <div style="font-family:var(--condensed);font-size:15px;font-weight:700;letter-spacing:0.5px;color:var(--dk-text);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--dk-gold);">
-      📊 CENTRE INCIDENTS COMPARISON — HISTORICAL
+    <div style="font-family:var(--condensed);font-size:15px;font-weight:700;letter-spacing:0.5px;color:var(--dk-text);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--dk-gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <span>📊 CENTRE INCIDENTS COMPARISON — HISTORICAL</span>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="dk-btn" onclick="exportHistoricalExcel()" style="font-size:12px;padding:6px 14px;background:rgba(34,197,94,0.15);color:#5DCAA5;border-color:rgba(34,197,94,0.3);">📊 Export Excel</button>
+        <select id="historical-view-sel" onchange="_histViewMode=this.value;renderHistoricalComparison();"
+          style="font-family:var(--sans);font-weight:500;font-size:12px;padding:6px 10px;border:1px solid var(--dk-border2);border-radius:7px;background:var(--dk-bg3);color:var(--dk-text);outline:none;cursor:pointer;color-scheme:dark;"></select>
+      </div>
     </div>
     <div id="historical-meta" style="font-size:11px;color:var(--dk-text3);margin-bottom:12px;"></div>
     <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--dk-border);">
-      <table id="historical-table" style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;min-width:900px;"></table>
+      <table id="historical-table" class="rtbl dk-rtbl" style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;min-width:1500px;"></table>
     </div>
-    <div style="margin-top:16px;">
-      <div style="font-family:var(--condensed);font-size:14px;font-weight:700;color:var(--dk-text);margin-bottom:8px;">EMERGENCY INCIDENTS — APRIL 2026</div>
+    <div style="margin-top:16px;" id="emergency-table-section">
+      <div id="emergency-table-title" style="font-family:var(--condensed);font-size:14px;font-weight:700;color:var(--dk-text);margin-bottom:8px;">NOTABLE INCIDENTS</div>
       <div id="emergency-table-wrap" style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--dk-border);"></div>
     </div>
   </div>
-</div>
+  </div><!-- /reports-monthly-view -->
 
-<!-- ═══ YTD SUMMARY ═══ -->
-<div class="panel dark-panel" id="panel-ytd" style="background:var(--dk-bg);min-height:calc(100vh - 110px);padding:24px 32px;">
+  <div id="reports-ytd-view" style="display:none;">
   <div class="page-hdr" style="margin-bottom:20px;">
     <div>
       <div class="page-title" style="color:var(--dk-text);font-size:21px;">Year-to-Date Summary</div>
@@ -705,6 +722,8 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
       <table class="rtbl dk-rtbl" id="ytd-tbl"></table>
     </div>
   </div>
+  </div><!-- /reports-ytd-view -->
+
 </div>
 
 
@@ -1567,16 +1586,28 @@ function showTab(name, el) {
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
   if(el) el.classList.add('active');
-  const barTabs = ['monthly','ytd','log','email','ppe','aas','equipment'];
+  const barTabs = ['reports','log','email','ppe','aas','equipment'];
   document.getElementById('site-sel-bar').style.display = barTabs.includes(name) ? 'flex' : 'none';
-  if(name==='monthly') { buildSiteChips(); initMonthly(); renderHistoricalComparison(); }
-  if(name==='ytd')     { buildSiteChips(); renderYTD(); }
+  if(name==='reports') { buildSiteChips(); showReportsSub(_activeReportsSub); }
   if(name==='log')     { buildSiteChips(); initLog(); }
   if(name==='ppe')     { buildSiteChips(); renderPPEPanel(); }
   if(name==='aas')       { buildSiteChips(); renderAASPanel(); }
   if(name==='equipment') { buildSiteChips(); renderEquipPanel(); }
   if(name==='email')   { populateEmailSiteSelect(); populateEmailMonths(); }
   if(name==='sites')   { renderSitesSettings(); }
+}
+
+// Reports tile now hosts Monthly + YTD as two sub-views in one page.
+let _activeReportsSub = 'monthly';
+function showReportsSub(sub, el) {
+  _activeReportsSub = sub;
+  document.getElementById('reports-monthly-view').style.display = sub === 'monthly' ? '' : 'none';
+  document.getElementById('reports-ytd-view').style.display     = sub === 'ytd'     ? '' : 'none';
+  document.querySelectorAll('.reports-sub-tab').forEach(t=>t.classList.remove('active'));
+  const activeEl = el || document.getElementById('reports-tab-'+sub);
+  if (activeEl) activeEl.classList.add('active');
+  if (sub === 'monthly') { initMonthly(); renderHistoricalComparison(); }
+  if (sub === 'ytd')     { renderYTD(); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1608,8 +1639,10 @@ function refreshActivePanel() {
   const active = document.querySelector('.panel.active');
   if (!active) return;
   const id = active.id.replace('panel-','');
-  if(id==='monthly') { initMonthly(); renderHistoricalComparison(); }
-  if(id==='ytd')     renderYTD();
+  if(id==='reports') {
+    if(_activeReportsSub==='ytd') renderYTD();
+    else { initMonthly(); renderHistoricalComparison(); }
+  }
   if(id==='log')     initLog();
   if(id==='ppe')     renderPPEPanel();
   if(id==='aas')       renderAASPanel();
@@ -1648,7 +1681,6 @@ function renderOverview() {
   const noSites = document.getElementById('overview-no-sites');
   const statBar = document.getElementById('overview-stats-bar');
   grid.innerHTML = '';
-  updateIncidentReportViewerLink();
   updatePoliciesLink();
 
   if (!sites.length) {
@@ -1660,7 +1692,7 @@ function renderOverview() {
   const allIncidents = sites.flatMap(s=>(s.data||[]).filter(r=>!isExcluded(r.type, r.siteCode)));
   const allMonths    = getSortedMonths(allIncidents);
   const lastMonth    = allMonths[allMonths.length-1]||'';
-  const countWithSecondary = arr => arr.filter(r => !REGISTER_LINKED_TYPES_LC.has((r.type||'').toLowerCase())).reduce((s, r) => s + 1 + (r.secondary && r.secondary !== r.type ? 1 : 0), 0);
+  const countWithSecondary = arr => arr.filter(r => !REGISTER_LINKED_TYPES_LC.has((r.type||'').toLowerCase())).reduce((s, r) => s + 1, 0);
   const thisMonthAll = countWithSecondary(allIncidents.filter(r=>r.month===lastMonth));
   const allPPE = sites.reduce((n,s)=>n+(s.ppeData||[]).length, 0);
   const allAAS = sites.reduce((n,s)=>n+(s.aasData||[]).length, 0);
@@ -1882,7 +1914,7 @@ function renderMonthly(idx) {
   const currData = data.filter(r=>r.month===monthStr);
   const priorData= data.filter(r=>r.month===priorStr);
   const countWS = arr => arr.filter(r => !REGISTER_LINKED_TYPES_LC.has((r.type||'').toLowerCase()))
-    .reduce((s,r) => s + 1 + (r.secondary && r.secondary !== r.type ? 1 : 0), 0);
+    .reduce((s,r) => s + 1, 0);
   const cT=countWS(currData), pT=countWS(priorData), diff=cT-pT;
 
   document.getElementById('monthly-title').textContent   = `Monthly Report — ${site?.name||''} · ${monthStr}`;
@@ -2019,7 +2051,7 @@ function renderYTD() {
 
   // ── Count helpers ───────────────────────────────────────────────────────────
   const cnt    = (month, cat) => data.filter(r => r.month === month &&
-    (r.type === cat || (r.secondary && r.secondary !== r.type && r.secondary === cat))).length;
+    r.type === cat).length;
   const allCatsFlat = Object.values(catSections).flat();
   const cntAll = (month) => allCatsFlat.reduce((s, cat) => s + cnt(month, cat), 0);
 
@@ -2115,6 +2147,483 @@ function renderYTD() {
 
   // Store for PDF export
   window._ytdData = { colMonths, this12Months, prev12Months, currentMonthLabel, shortLabels, catSections, data };
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORICAL COMPARISON — as many fiscal years (1 Jul – 30 Jun) back
+// as this site's data goes, grouped by its own severity/category
+// sections. Mirrors renderYTD's counting rules (type OR a distinct
+// secondary type both count) so totals agree with the rest of the app.
+//
+// Two kinds of views, picked from the dropdown built into the section header:
+//   'detail-<prevYear>-<curYear>' — month-by-month layout for that ONE pair
+//                        of adjacent fiscal years (one option per consecutive
+//                        pair the data has: 24/25 cf 25/26, 25/26 cf 26/27...)
+//   '3'/'4'/'5'/'all' — a compact Category × Fiscal-Year summary,
+//                        one column per year, as far back as data exists
+// _histViewMode persists across re-renders (site switches, refreshes)
+// so the user's chosen view sticks until they change it.
+// ═══════════════════════════════════════════════════════
+let _histViewMode = null;
+
+function renderHistoricalComparison() {
+  const section = document.getElementById('historical-section');
+  const data = getActiveData();
+  const site = getActiveSite();
+
+  if (!data.length) { section.style.display = 'none'; return; }
+
+  const { sections: catSections } = getCatsForSite(data, site?.name || '');
+  const sectionEntries = Object.entries(catSections).filter(([key]) => key !== 'OTHER');
+  if (!sectionEntries.length) { section.style.display = 'none'; return; }
+
+  const FY_MONTHS   = ['July','August','September','October','November','December',
+                        'January','February','March','April','May','June'];
+  const CAL_MONTHS  = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+  const fyLabel = y => `FY${y}/${String((y + 1) % 100).padStart(2, '0')}`;
+  const fyMonths = startYear => FY_MONTHS.map((m, i) => ({
+    label: m + ' ' + (i < 6 ? startYear : startYear + 1),
+    short: m.slice(0, 3)
+  }));
+
+  // Same rule as renderYTD's cnt(): primary type match, or a distinct
+  // secondary type match, so one record can land in two categories.
+  const cnt = (month, cat) => data.filter(r => r.month === month &&
+    r.type === cat).length;
+  const fyTotal = (startYear, cat) => fyMonths(startYear).reduce((s, m) => s + cnt(m.label, cat), 0);
+
+  // ── Discover every fiscal year actually present in this site's data ────────
+  const fyStartForMonthLabel = monthLabel => {
+    const parts = (monthLabel || '').split(' ');
+    const mIdx = CAL_MONTHS.indexOf(parts[0]);
+    const y = parseInt(parts[1], 10);
+    if (mIdx < 0 || isNaN(y)) return null;
+    return mIdx >= 6 ? y : y - 1; // Jul(6)..Dec(11) → FY starts this year; Jan(0)..Jun(5) → FY started last year
+  };
+  const allMonthsSorted = getSortedMonths(data);
+  const fyStartYears = [...new Set(allMonthsSorted.map(fyStartForMonthLabel).filter(v => v !== null))]
+    .sort((a, b) => a - b);
+  if (!fyStartYears.length) { section.style.display = 'none'; return; }
+  const totalFYs = fyStartYears.length;
+  const latestFY = fyStartYears[fyStartYears.length - 1];
+
+  // ── How much of the latest fiscal year has actually elapsed? ───────────────
+  // A partial current year (say, 2 months in) must never be diffed against a
+  // prior year's FULL 12 months — that always reads as a huge drop. Every
+  // comparison figure below (YTD columns, +/-, Δ, sparklines) is capped to
+  // the same Jul→elapsedCount window in EVERY year, so it's a fair like-for-
+  // like "same point in the year" comparison. Once a year is complete,
+  // elapsedCount is 12 and this has no effect — it's the same as before.
+  //
+  // Based on TODAY'S calendar date, not on which months happen to already
+  // have a logged incident — a genuinely-elapsed month with zero incidents
+  // so far must still count as "elapsed", or the window would undercount it.
+  const today = new Date();
+  const todayFYStart = today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1;
+  const latestFYMonthLabels = fyMonths(latestFY).map(m => m.label);
+  let elapsedCount;
+  if (todayFYStart === latestFY) {
+    const fyMonthIdxOfToday = today.getMonth() >= 6 ? today.getMonth() - 6 : today.getMonth() + 6;
+    elapsedCount = fyMonthIdxOfToday + 1;
+  } else if (todayFYStart > latestFY) {
+    // The data's latest fiscal year has fully run its course relative to today.
+    elapsedCount = 12;
+  } else {
+    // Data contains months beyond today (e.g. future-dated test records) —
+    // fall back to data-presence so we never divide by an out-of-range month.
+    const latestMonthLabel = allMonthsSorted[allMonthsSorted.length - 1];
+    elapsedCount = Math.max(1, latestFYMonthLabels.indexOf(latestMonthLabel) + 1);
+  }
+  const lastElapsedShort = fyMonths(latestFY)[elapsedCount - 1].short;
+  // (fyTotal, defined above with cnt(), is the full-year total — used only to
+  // decide which categories are worth showing as rows at all.)
+  // Windowed total — first `count` months of the given FY only (defaults to the
+  // latest-FY elapsed window). This is what every displayed comparison figure
+  // (YTD, +/-, Δ, sparklines) is built from.
+  const windowedFyTotal = (startYear, cat, count = elapsedCount) => fyMonths(startYear).slice(0, count)
+    .reduce((s, m) => s + cnt(m.label, cat), 0);
+
+  // ── Build the view-picker options for however many years this site has ─────
+  // One "detail" (month-by-month) option per pair of consecutive fiscal years
+  // present in the data — 24/25 vs 25/26, 25/26 vs 26/27, etc — so any two
+  // adjacent years can be picked, not just the latest against the one before.
+  const detailPairs = [];
+  for (let i = 1; i < fyStartYears.length; i++) {
+    detailPairs.push({ prevY: fyStartYears[i - 1], curY: fyStartYears[i] });
+  }
+  // Same idea, one column-block per year, for three consecutive fiscal years
+  // at once (only offered once there are at least 3 years of data) — a wider
+  // table (3× the month columns of the 2-year view) but makes full use of a
+  // landscape page's width when there's a third year worth showing.
+  const detailTriples = [];
+  for (let i = 2; i < fyStartYears.length; i++) {
+    detailTriples.push({ y0: fyStartYears[i - 2], y1: fyStartYears[i - 1], y2: fyStartYears[i] });
+  }
+  const summaryCandidates = [3, 4, 5].filter(n => n < totalFYs);
+  const viewOptions = detailPairs.map(({ prevY, curY }) => ({
+    value: `detail-${prevY}-${curY}`,
+    label: `${fyLabel(prevY)} cf ${fyLabel(curY)}${curY === latestFY && elapsedCount < 12 ? ' (YTD)' : ''}`
+  }));
+  detailTriples.forEach(({ y0, y1, y2 }) => viewOptions.push({
+    value: `detail3-${y0}-${y1}-${y2}`,
+    label: `${fyLabel(y0)} cf ${fyLabel(y1)} cf ${fyLabel(y2)}${y2 === latestFY && elapsedCount < 12 ? ' (YTD)' : ''}`
+  }));
+  summaryCandidates.forEach(n => viewOptions.push({ value: String(n), label: `Last ${n} Years (Summary)` }));
+  viewOptions.push({
+    value: 'all',
+    label: totalFYs > 1
+      ? `All ${totalFYs} Years — ${fyLabel(fyStartYears[0])}–${fyLabel(latestFY)} (Summary)`
+      : `${fyLabel(latestFY)} Only`
+  });
+
+  let mode = _histViewMode;
+  const validValues = viewOptions.map(o => o.value);
+  if (!validValues.includes(mode)) {
+    // First load, or the prior choice no longer fits this site: default to the
+    // most recent year-pair if one exists, else fall back to the summary view.
+    mode = detailPairs.length ? `detail-${latestFY - 1}-${latestFY}` : 'all';
+    if (!validValues.includes(mode)) mode = totalFYs >= 3 ? 'all' : (viewOptions[0] ? viewOptions[0].value : 'all');
+  }
+  _histViewMode = mode;
+
+  const selEl = document.getElementById('historical-view-sel');
+  selEl.innerHTML = viewOptions.map(o =>
+    `<option value="${o.value}"${o.value === mode ? ' selected' : ''}>${o.label}</option>`).join('');
+
+  // ── Sparkline for the summary view — thin line, endpoint emphasized ────────
+  const sparkline = vals => {
+    const w = 64, h = 22, pad = 3;
+    const max = Math.max(...vals, 0), min = Math.min(...vals, 0);
+    const range = (max - min) || 1;
+    const step = vals.length > 1 ? (w - pad * 2) / (vals.length - 1) : 0;
+    const xAt = i => pad + i * step;
+    const yAt = v => h - pad - ((v - min) / range) * (h - pad * 2);
+    const pts = vals.map((v, i) => `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`).join(' ');
+    const lastI = vals.length - 1;
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;">` +
+      `<polyline points="${pts}" fill="none" stroke="#5DCAA5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>` +
+      `<circle cx="${xAt(lastI).toFixed(1)}" cy="${yAt(vals[lastI]).toFixed(1)}" r="2.2" fill="var(--dk-gold)"/></svg>`;
+  };
+
+  if (mode.startsWith('detail3-')) {
+    // ── Three-year, month-by-month layout — same idea as the two-year detail
+    // view below, generalised to one column-block per year. Kept as its own
+    // branch (rather than folding into the two-year code) so the existing,
+    // already-verified two-year table is never touched by this. ──
+    const [, y0Str, y1Str, y2Str] = mode.split('-');
+    const yearsDesc = [parseInt(y2Str, 10), parseInt(y1Str, 10), parseInt(y0Str, 10)]; // newest first
+    const curFYStart = yearsDesc[0];
+    // Only the newest year in the set can be partial — the two older ones are
+    // always complete 12-month years, same rule as the two-year view.
+    const pairCount = curFYStart === latestFY ? elapsedCount : 12;
+    const pairLastShort = fyMonths(curFYStart)[pairCount - 1].short;
+    const yearMonths = yearsDesc.map(y => fyMonths(y));
+    const sumMonths = (months, cat) => months.reduce((s, m) => s + cnt(m.label, cat), 0);
+
+    const allCatsFlat = sectionEntries.flatMap(([, cats]) => cats);
+    const yearTotals = yearsDesc.map(y => allCatsFlat.reduce((s, c) => s + windowedFyTotal(y, c, pairCount), 0));
+    const curTotal = yearTotals[0], oldTotal = yearTotals[yearTotals.length - 1];
+    const totalDiff = curTotal - oldTotal;
+    const pctTxt = oldTotal > 0 ? Math.round(Math.abs(totalDiff) / oldTotal * 100) + '%' : (curTotal > 0 ? 'new' : '—');
+    const badgeCls = totalDiff === 0 ? 'badge-z' : (totalDiff > 0 ? 'badge-up' : 'badge-dn');
+    const arrow = totalDiff === 0 ? '—' : (totalDiff > 0 ? '▲' : '▼');
+    document.getElementById('historical-meta').innerHTML =
+      `${site?.name || 'Site'} · ${yearsDesc.map(fyLabel).join(' vs ')} (1 Jul – 30 Jun) · ` +
+      `<strong style="color:var(--dk-text);">${yearTotals.join(' vs ')}</strong> tracked incidents ` +
+      `<span style="opacity:0.7;">(Jul–${pairLastShort} all years)</span> · ` +
+      `<span class="${badgeCls}" style="padding:2px 7px;border-radius:20px;font-weight:600;">${arrow} ${Math.abs(totalDiff)} (${pctTxt})</span>` +
+      (totalFYs > 3 ? ` · <span style="opacity:0.7;">${totalFYs} years of data available — see the view picker above</span>` : '');
+
+    const yearBg = ['rgba(59,130,246,0.15)', 'rgba(255,255,255,0.04)', 'rgba(168,85,247,0.10)'];
+    // All three YTD columns get the same green "this is a total" highlight
+    // (graded slightly lighter for older years, purely for visual variety —
+    // not to imply the older ones matter less) — every YTD column should
+    // read as highlighted, not just the current year's.
+    const ytdBg  = ['rgba(34,197,94,0.12)', 'rgba(34,197,94,0.08)', 'rgba(34,197,94,0.05)'];
+    const yearTag = i => i === 0 ? ' — CURRENT YEAR' : (i === yearsDesc.length - 1 ? ' — OLDEST YEAR' : ' — PRIOR YEAR');
+    const colCount = 1 + (12 + 1) * yearsDesc.length + 1;
+
+    let html = `<thead>
+      <tr>
+        <th rowspan="2" style="text-align:left;min-width:170px;">Category</th>
+        ${yearsDesc.map((y, i) => `
+          <th colspan="12" style="text-align:center;background:${yearBg[i]};border-left:2px solid rgba(255,255,255,0.15);">${fyLabel(y)}${yearTag(i)}</th>
+          <th rowspan="2" style="background:${ytdBg[i]};border-left:2px solid var(--dk-border2);">YTD<br><span style="font-weight:400;font-size:0.69em;">thru ${pairLastShort}</span></th>
+        `).join('')}
+        <th rowspan="2" style="background:rgba(201,151,58,0.12);">+/&minus;</th>
+      </tr>
+      <tr>
+        ${yearMonths.map(months => months.map(m => `<th style="font-size:0.77em;">${m.short}</th>`).join('')).join('')}
+      </tr>
+    </thead><tbody>`;
+
+    const grandByYear = yearsDesc.map(() => new Array(12).fill(0));
+    const grandYtdByYear = new Array(yearsDesc.length).fill(0);
+
+    sectionEntries.forEach(([label, cats]) => {
+      const activeCats = cats.filter(cat => yearMonths.some(months => sumMonths(months, cat) > 0));
+      if (!activeCats.length) return;
+
+      html += `<tr class="sec-hdr"><td colspan="${colCount}">${label}</td></tr>`;
+      const secByYear = yearsDesc.map(() => new Array(12).fill(0));
+      const subYtdByYear = new Array(yearsDesc.length).fill(0);
+
+      activeCats.forEach(cat => {
+        const valsByYear = yearMonths.map(months => months.map(m => cnt(m.label, cat)));
+        valsByYear.forEach((vals, yi) => vals.forEach((v, i) => secByYear[yi][i] += v));
+        const ytdByYear = yearsDesc.map(y => windowedFyTotal(y, cat, pairCount));
+        ytdByYear.forEach((v, yi) => subYtdByYear[yi] += v);
+        const diff = ytdByYear[0] - ytdByYear[ytdByYear.length - 1];
+        const diffCol = diff > 0 ? '#F0997B' : diff < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+        html += `<tr>
+          <td>${cat}</td>
+          ${valsByYear.map((vals, yi) => vals.map(v => `<td class="num ${v===0?'zero':'hi'}">${v || '·'}</td>`).join('') +
+            `<td class="num" style="font-weight:700;background:${ytdBg[yi]};border-left:2px solid var(--dk-border2);">${ytdByYear[yi]}</td>`).join('')}
+          <td class="num" style="color:${diffCol};font-weight:700;">${diff > 0 ? '+' : ''}${diff}</td>
+        </tr>`;
+      });
+
+      const subDiff = subYtdByYear[0] - subYtdByYear[subYtdByYear.length - 1];
+      const subDiffCol = subDiff > 0 ? '#F0997B' : subDiff < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+      html += `<tr class="sub-row">
+        <td>Subtotal</td>
+        ${secByYear.map((vals, yi) => vals.map(v => `<td class="num">${v}</td>`).join('') +
+          `<td class="num" style="font-weight:700;background:${ytdBg[yi]};border-left:2px solid var(--dk-border2);">${subYtdByYear[yi]}</td>`).join('')}
+        <td class="num" style="color:${subDiffCol};font-weight:700;">${subDiff > 0 ? '+' : ''}${subDiff}</td>
+      </tr>`;
+
+      secByYear.forEach((vals, yi) => vals.forEach((v, i) => grandByYear[yi][i] += v));
+      subYtdByYear.forEach((v, yi) => grandYtdByYear[yi] += v);
+    });
+
+    const grandDiff = grandYtdByYear[0] - grandYtdByYear[grandYtdByYear.length - 1];
+    const grandDiffCol = grandDiff > 0 ? '#F0997B' : grandDiff < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+    html += `<tr class="grand">
+      <td>GRAND TOTAL</td>
+      ${grandByYear.map((vals, yi) => vals.map(v => `<td class="num">${v}</td>`).join('') +
+        `<td class="num" style="font-weight:800;">${grandYtdByYear[yi]}</td>`).join('')}
+      <td class="num" style="color:${grandDiffCol};font-weight:800;">${grandDiff > 0 ? '+' : ''}${grandDiff}</td>
+    </tr></tbody>`;
+
+    document.getElementById('historical-table').innerHTML = html;
+
+  } else if (mode.startsWith('detail-')) {
+    // ── Two-year, month-by-month layout for the SELECTED pair of adjacent
+    // fiscal years (any consecutive pair the data has, not just the latest) ──
+    const [, prevYStr, curYStr] = mode.split('-');
+    const curFYStart = parseInt(curYStr, 10);
+    const prevFYStart = parseInt(prevYStr, 10);
+    // Only the latest fiscal year can be partial — an older pair is always
+    // two complete 12-month years, so it gets the full 12-month window.
+    const pairCount = curFYStart === latestFY ? elapsedCount : 12;
+    const pairLastShort = fyMonths(curFYStart)[pairCount - 1].short;
+    const curMonths = fyMonths(curFYStart), prevMonths = fyMonths(prevFYStart);
+    const sumMonths = (months, cat) => months.reduce((s, m) => s + cnt(m.label, cat), 0);
+
+    const allCatsFlat = sectionEntries.flatMap(([, cats]) => cats);
+    // Headline totals compare the SAME Jul→{pairLastShort} window in both
+    // years — not a partial current year against a prior year's full 12 months.
+    const curTotal = allCatsFlat.reduce((s, c) => s + windowedFyTotal(curFYStart, c, pairCount), 0);
+    const prevTotal = allCatsFlat.reduce((s, c) => s + windowedFyTotal(prevFYStart, c, pairCount), 0);
+    const totalDiff = curTotal - prevTotal;
+    const pctTxt = prevTotal > 0 ? Math.round(Math.abs(totalDiff) / prevTotal * 100) + '%' : (curTotal > 0 ? 'new' : '—');
+    const badgeCls = totalDiff === 0 ? 'badge-z' : (totalDiff > 0 ? 'badge-up' : 'badge-dn');
+    const arrow = totalDiff === 0 ? '—' : (totalDiff > 0 ? '▲' : '▼');
+    document.getElementById('historical-meta').innerHTML =
+      `${site?.name || 'Site'} · ${fyLabel(curFYStart)} vs ${fyLabel(prevFYStart)} (1 Jul – 30 Jun) · ` +
+      `<strong style="color:var(--dk-text);">${curTotal}</strong> vs <strong>${prevTotal}</strong> tracked incidents ` +
+      `<span style="opacity:0.7;">(Jul–${pairLastShort} both years)</span> · ` +
+      `<span class="${badgeCls}" style="padding:2px 7px;border-radius:20px;font-weight:600;">${arrow} ${Math.abs(totalDiff)} (${pctTxt})</span>` +
+      (totalFYs > 2 ? ` · <span style="opacity:0.7;">${totalFYs} years of data available — see the view picker above</span>` : '');
+
+    const colCount = 1 + 12 + 1 + 12 + 1 + 1;
+    let html = `<thead>
+      <tr>
+        <th rowspan="2" style="text-align:left;min-width:170px;">Category</th>
+        <th colspan="12" style="text-align:center;background:rgba(59,130,246,0.15);border-left:2px solid rgba(59,130,246,0.4);">${fyLabel(curFYStart)} — CURRENT YEAR</th>
+        <th rowspan="2" style="background:rgba(34,197,94,0.12);border-left:2px solid rgba(34,197,94,0.3);">YTD<br><span style="font-weight:400;font-size:0.69em;">thru ${pairLastShort}</span></th>
+        <th colspan="12" style="text-align:center;background:rgba(255,255,255,0.04);border-left:2px solid var(--dk-border2);">${fyLabel(prevFYStart)} — PREVIOUS YEAR</th>
+        <th rowspan="2" style="background:rgba(34,197,94,0.12);border-left:2px solid rgba(34,197,94,0.3);">YTD<br><span style="font-weight:400;font-size:0.69em;">thru ${pairLastShort}</span></th>
+        <th rowspan="2" style="background:rgba(201,151,58,0.12);">+/&minus;</th>
+      </tr>
+      <tr>
+        ${curMonths.map(m => `<th style="font-size:0.77em;">${m.short}</th>`).join('')}
+        ${prevMonths.map(m => `<th style="font-size:0.77em;">${m.short}</th>`).join('')}
+      </tr>
+    </thead><tbody>`;
+
+    const grandCur = new Array(12).fill(0), grandPrev = new Array(12).fill(0);
+    let grandCurYtd = 0, grandPrevYtd = 0;
+
+    sectionEntries.forEach(([label, cats]) => {
+      const activeCats = cats.filter(cat => sumMonths(curMonths, cat) > 0 || sumMonths(prevMonths, cat) > 0);
+      if (!activeCats.length) return;
+
+      html += `<tr class="sec-hdr"><td colspan="${colCount}">${label}</td></tr>`;
+      const secCur = new Array(12).fill(0), secPrev = new Array(12).fill(0);
+      let subCurYtd = 0, subPrevYtd = 0;
+
+      activeCats.forEach(cat => {
+        const curVals = curMonths.map(m => cnt(m.label, cat));
+        const prevVals = prevMonths.map(m => cnt(m.label, cat));
+        curVals.forEach((v, i) => secCur[i] += v);
+        prevVals.forEach((v, i) => secPrev[i] += v);
+        // Windowed, like-for-like: same Jul→{pairLastShort} span in both years.
+        const curYtd = windowedFyTotal(curFYStart, cat, pairCount);
+        const prevYtd = windowedFyTotal(prevFYStart, cat, pairCount);
+        subCurYtd += curYtd; subPrevYtd += prevYtd;
+        const diff = curYtd - prevYtd;
+        const diffCol = diff > 0 ? '#F0997B' : diff < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+        html += `<tr>
+          <td>${cat}</td>
+          ${curVals.map(v => `<td class="num ${v===0?'zero':'hi'}">${v || '·'}</td>`).join('')}
+          <td class="num" style="font-weight:700;background:rgba(34,197,94,0.08);border-left:2px solid rgba(34,197,94,0.2);">${curYtd}</td>
+          ${prevVals.map(v => `<td class="num ${v===0?'zero':''}">${v || '·'}</td>`).join('')}
+          <td class="num" style="font-weight:700;background:rgba(34,197,94,0.08);border-left:2px solid rgba(34,197,94,0.2);">${prevYtd}</td>
+          <td class="num" style="color:${diffCol};font-weight:700;">${diff > 0 ? '+' : ''}${diff}</td>
+        </tr>`;
+      });
+
+      const subDiff = subCurYtd - subPrevYtd;
+      const subDiffCol = subDiff > 0 ? '#F0997B' : subDiff < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+      html += `<tr class="sub-row">
+        <td>Subtotal</td>
+        ${secCur.map(v => `<td class="num">${v}</td>`).join('')}
+        <td class="num" style="font-weight:700;background:rgba(34,197,94,0.08);border-left:2px solid rgba(34,197,94,0.2);">${subCurYtd}</td>
+        ${secPrev.map(v => `<td class="num">${v}</td>`).join('')}
+        <td class="num" style="font-weight:700;background:rgba(34,197,94,0.08);border-left:2px solid rgba(34,197,94,0.2);">${subPrevYtd}</td>
+        <td class="num" style="color:${subDiffCol};font-weight:700;">${subDiff > 0 ? '+' : ''}${subDiff}</td>
+      </tr>`;
+
+      secCur.forEach((v, i) => grandCur[i] += v);
+      secPrev.forEach((v, i) => grandPrev[i] += v);
+      grandCurYtd += subCurYtd; grandPrevYtd += subPrevYtd;
+    });
+
+    const grandDiff = grandCurYtd - grandPrevYtd;
+    const grandDiffCol = grandDiff > 0 ? '#F0997B' : grandDiff < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+    html += `<tr class="grand">
+      <td>GRAND TOTAL</td>
+      ${grandCur.map(v => `<td class="num">${v}</td>`).join('')}
+      <td class="num" style="font-weight:800;">${grandCurYtd}</td>
+      ${grandPrev.map(v => `<td class="num">${v}</td>`).join('')}
+      <td class="num" style="font-weight:800;">${grandPrevYtd}</td>
+      <td class="num" style="color:${grandDiffCol};font-weight:800;">${grandDiff > 0 ? '+' : ''}${grandDiff}</td>
+    </tr></tbody>`;
+
+    document.getElementById('historical-table').innerHTML = html;
+
+  } else {
+    // ── Compact Category × Fiscal-Year summary, N years back ──────────────────
+    const n = mode === 'all' ? totalFYs : Math.min(parseInt(mode, 10), totalFYs);
+    const showYears = fyStartYears.slice(-n);
+    const hasDelta = showYears.length > 1;
+    const colCount = 1 + showYears.length + 1 + (hasDelta ? 1 : 0);
+
+    const grandByYear = new Array(showYears.length).fill(0);
+    let grandTotal = 0;
+
+    let html = `<thead><tr>
+      <th style="text-align:left;min-width:170px;">Category</th>
+      ${showYears.map(y => `<th style="min-width:60px;">${fyLabel(y)}</th>`).join('')}
+      <th style="min-width:76px;">Trend</th>
+      ${hasDelta ? `<th style="background:rgba(201,151,58,0.12);min-width:64px;">${fyLabel(showYears[0])}→${fyLabel(showYears[showYears.length-1])}</th>` : ''}
+    </tr></thead><tbody>`;
+
+    sectionEntries.forEach(([label, cats]) => {
+      // Inclusion uses the true full-year total — a category stays listed even
+      // if its only activity falls outside the elapsed window being compared.
+      const activeCats = cats.filter(cat => showYears.some(y => fyTotal(y, cat) > 0));
+      if (!activeCats.length) return;
+
+      html += `<tr class="sec-hdr"><td colspan="${colCount}">${label}</td></tr>`;
+      const secByYear = new Array(showYears.length).fill(0);
+
+      activeCats.forEach(cat => {
+        // Every year capped to the same Jul→{lastElapsedShort} window, so the
+        // newest (possibly partial) year is never unfairly diffed against a
+        // prior year's full 12 months.
+        const vals = showYears.map(y => windowedFyTotal(y, cat));
+        vals.forEach((v, i) => secByYear[i] += v);
+        const delta = hasDelta ? vals[vals.length - 1] - vals[0] : null;
+        const deltaCol = delta > 0 ? '#F0997B' : delta < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+        html += `<tr>
+          <td>${cat}</td>
+          ${vals.map(v => `<td class="num ${v===0?'zero':'hi'}">${v || '·'}</td>`).join('')}
+          <td>${sparkline(vals)}</td>
+          ${hasDelta ? `<td class="num" style="color:${deltaCol};font-weight:700;">${delta > 0 ? '+' : ''}${delta}</td>` : ''}
+        </tr>`;
+      });
+
+      const subDelta = hasDelta ? secByYear[secByYear.length - 1] - secByYear[0] : null;
+      const subDeltaCol = subDelta > 0 ? '#F0997B' : subDelta < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+      html += `<tr class="sub-row">
+        <td>Subtotal</td>
+        ${secByYear.map(v => `<td class="num">${v}</td>`).join('')}
+        <td>${sparkline(secByYear)}</td>
+        ${hasDelta ? `<td class="num" style="color:${subDeltaCol};font-weight:700;">${subDelta > 0 ? '+' : ''}${subDelta}</td>` : ''}
+      </tr>`;
+
+      secByYear.forEach((v, i) => grandByYear[i] += v);
+      grandTotal += secByYear.reduce((a, b) => a + b, 0);
+    });
+
+    const grandDelta = hasDelta ? grandByYear[grandByYear.length - 1] - grandByYear[0] : null;
+    const grandDeltaCol = grandDelta > 0 ? '#F0997B' : grandDelta < 0 ? '#5DCAA5' : 'var(--dk-text3)';
+    html += `<tr class="grand">
+      <td>GRAND TOTAL</td>
+      ${grandByYear.map(v => `<td class="num">${v}</td>`).join('')}
+      <td>${sparkline(grandByYear)}</td>
+      ${hasDelta ? `<td class="num" style="color:${grandDeltaCol};font-weight:800;">${grandDelta > 0 ? '+' : ''}${grandDelta}</td>` : ''}
+    </tr></tbody>`;
+
+    document.getElementById('historical-table').innerHTML = html;
+
+    const rangeTxt = showYears.length > 1 ? `${fyLabel(showYears[0])}–${fyLabel(showYears[showYears.length-1])}` : fyLabel(showYears[0]);
+    document.getElementById('historical-meta').innerHTML =
+      `${site?.name || 'Site'} · ${showYears.length} year${showYears.length > 1 ? 's' : ''} shown (${rangeTxt} of ${totalFYs} available) · ` +
+      `<strong style="color:var(--dk-text);">${grandTotal}</strong> tracked incidents across the period` +
+      (elapsedCount < 12 ? ` <span style="opacity:0.7;">(each year capped to Jul–${lastElapsedShort} — as far as ${fyLabel(latestFY)} has reached — for a fair comparison)</span>` : '');
+  }
+
+  section.style.display = 'block';
+
+  // ── Notable incidents — most recent month, highest-priority section ────────
+  const latestMonth = allMonthsSorted[allMonthsSorted.length - 1];
+  const [topLabel, topCats] = sectionEntries[0];
+  const titleEl = document.getElementById('emergency-table-title');
+  const wrapEl  = document.getElementById('emergency-table-wrap');
+
+  if (!latestMonth) {
+    titleEl.textContent = 'NOTABLE INCIDENTS';
+    wrapEl.innerHTML = '';
+  } else {
+    const rows = data.filter(r => r.month === latestMonth &&
+      (topCats.includes(r.type) || (r.secondary && topCats.includes(r.secondary))))
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    titleEl.textContent = `${topLabel} INCIDENTS — ${latestMonth.toUpperCase()}`;
+    if (!rows.length) {
+      wrapEl.innerHTML = `<div style="padding:16px;font-size:12px;color:var(--dk-text3);">No ${topLabel.toLowerCase()} incidents recorded in ${latestMonth}.</div>`;
+    } else {
+      let t = `<table class="dk-log-tbl" style="width:100%;"><thead><tr>
+        <th>Date</th><th>Time</th><th>Type</th><th>Location</th><th>Officer</th><th>Details</th><th>Ref</th>
+      </tr></thead><tbody>`;
+      rows.forEach(r => {
+        t += `<tr>
+          <td>${r.date || ''}</td><td>${r.time || ''}</td><td>${r.type || ''}</td>
+          <td>${r.location || ''}</td><td>${r.officer || ''}</td>
+          <td class="fixed" style="white-space:normal;max-width:340px;">${(r.details || '').replace(/</g, '&lt;')}</td>
+          <td>${r.ref || ''}</td>
+        </tr>`;
+      });
+      t += '</tbody></table>';
+      wrapEl.innerHTML = t;
+    }
+  }
+
+  // Store for PDF export (generateMonthlyStatsPDF reads historical-section's HTML directly)
+  window._historicalData = { mode, fyStartYears, latestFY, sectionEntries, data };
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2756,8 +3265,8 @@ function buildPDFReport(site, allData, monthStr, guardsStr) {
   const compTitle1 = burnside ? 'High Priority'              : 'Security Related';
   const compTitle2 = burnside ? 'Medium / Low Priority'      : 'Emergency Related';
   const priorStr = priorYearMonth(monthStr);
-  const cntByCatPDF = (arr,cat) => arr.filter(r=>r.type===cat||(r.secondary&&r.secondary!==r.type&&r.secondary===cat)).length;
-  const cntCatsPDF  = (arr,cats) => arr.reduce((s,r) => s + (cats.includes(r.type)?1:0) + (r.secondary && r.secondary!==r.type && cats.includes(r.secondary)?1:0), 0);
+  const cntByCatPDF = (arr,cat) => arr.filter(r=>r.type===cat).length;
+  const cntCatsPDF  = (arr,cats) => arr.filter(r => cats.includes(r.type)).length;
   const hTotal = catSections[secKey]   ? cntCatsPDF(allData.filter(r=>r.month===monthStr),stdCats) : 0;
   const mTotal = catSections[medKey]   ? cntCatsPDF(allData.filter(r=>r.month===monthStr),emgCats) : 0;
   const lTotal = catSections[lowKey]   ? cntCatsPDF(allData.filter(r=>r.month===monthStr),guardCats) : 0;
@@ -2832,7 +3341,7 @@ function buildPDFReport(site, allData, monthStr, guardsStr) {
   const lastFYLabel = 'Jul ' + (fyStartYear-1) + ' – Jun ' + fyStartYear;
 
   const cntPDF = (month, cat) => allData.filter(r => r.month === month &&
-    (r.type === cat || (r.secondary && r.secondary !== r.type && r.secondary === cat))).length;
+    r.type === cat).length;
 
   const buildCompTable = (cats, title) => {
     // Header: month columns + This FY Total + Last FY Total + +/−
@@ -2917,7 +3426,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#e8eef5;color:#1a1a
 
 /* COVER PAGE */
 .cover{
-  width:100%;max-width:794px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;max-width:1123px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:60px 40px;text-align:center;border-bottom:4px solid #1a3a6b;
   page-break-after:always;background:#fff;
 }
@@ -2933,7 +3442,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#e8eef5;color:#1a1a
 .cover-footer{margin-top:auto;font-size:11px;color:#999;padding-top:40px;}
 
 /* SECTIONS */
-.report-page{padding:16px 32px;max-width:794px;margin:0 auto;background:#fff;}
+.report-page{padding:16px 32px;max-width:1123px;margin:0 auto;background:#fff;}
 .page-break{page-break-before:always;padding-top:32px;}
 .page-hdr{
   display:flex;align-items:center;gap:14px;
@@ -3013,7 +3522,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#e8eef5;color:#1a1a
 .chart-title{font-size:13px;font-weight:700;color:#1a3a6b;margin-bottom:12px;}
 
 /* PRINT */
-@page { size: A4 portrait; margin: 12mm 14mm; }
+@page { size: 297mm 210mm; margin: 12mm 14mm; }
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   body{background:#fff;}
@@ -3285,7 +3794,7 @@ ${"<"}/script${">"}
           ];
           const EXCL = new Set(['Sign On','Sign Off','Centre Management Duties','Patrol','CCTV']);
           const mData = allData.filter(r => r.month===monthStr && !EXCL.has(r.type));
-          const cntHeat = arr => arr.reduce((s,r) => s + 1 + (r.secondary && r.secondary !== r.type && allCatsPDF.includes(r.secondary) ? 1 : 0), 0);
+          const cntHeat = arr => arr.length;
 
           // Find max for colour scaling
           let maxVal = 1;
@@ -3737,19 +4246,6 @@ function openSitePOI(siteId) {
     return;
   }
   window.open(site.poiUrl, '_blank');
-}
-
-function updateIncidentReportViewerLink() {
-  // Only show the Incident Report Viewer when there's more than one site
-  // registered here. Exactly one site means this is a client deployment,
-  // which shouldn't have access to the viewer at all (it lists every site).
-  // More than one site means an AMS manager is using this file, so it's shown.
-  const tile = document.getElementById('incident-viewer-tile');
-  const viewerUrl = localStorage.getItem('ams_wufoo_viewer_url') || '';
-  if (tile) {
-    tile.style.display = (sites.length > 1 && viewerUrl) ? '' : 'none';
-    if (viewerUrl) tile.href = viewerUrl;
-  }
 }
 
 function updatePoliciesLink() {
@@ -6826,7 +7322,7 @@ function exportYTDExcel() {
   if (!yd) { showToast('Please open the YTD tab first','error'); return; }
   const { this12Months, prev12Months, currentMonthLabel, shortLabels, catSections, data: d } = yd;
   const cnt = (month, cat) => d.filter(r => r.month === month &&
-    (r.type === cat || (r.secondary && r.secondary !== r.type && r.secondary === cat))).length;
+    r.type === cat).length;
   const allCatsFlat = Object.values(catSections).flat();
   const cntAll = (month) => allCatsFlat.reduce((s, cat) => s + cnt(month, cat), 0);
   const sum12 = (months, cat) => months.reduce((s, m) => s + cnt(m, cat), 0);
@@ -6868,6 +7364,112 @@ function exportYTDExcel() {
   XLSX.utils.book_append_sheet(wb, ws, 'YTD Rolling 12mo');
   XLSX.writeFile(wb, 'AMS_YTD_'+site.name.replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.xlsx');
   showToast('YTD exported ✓','success');
+}
+
+// ══ EXPORT HISTORICAL COMPARISON EXCEL (every year, every month) ═══════════════
+// Independent of whatever view (2-year / 3-year / summary) is currently picked
+// on screen — the on-screen table is deliberately capped to 2-3 years so it
+// fits a printed page, but a spreadsheet has no such width limit, so this
+// always builds every fiscal year the site has data for, oldest→newest,
+// laid out exactly like the PDF/on-screen table (section headers, one row per
+// category, Subtotal + GRAND TOTAL rows) but with a full 12-month block per
+// year rather than only 2-3 years side by side.
+function exportHistoricalExcel() {
+  if (typeof XLSX === 'undefined') { showToast('SheetJS not loaded','error'); return; }
+  const site = getActiveSite();
+  const data = getActiveData();
+  if (!site || !data.length) { showToast('No data to export','error'); return; }
+  if (!window._historicalData) renderHistoricalComparison();
+  const hd = window._historicalData;
+  if (!hd || !hd.fyStartYears || !hd.fyStartYears.length) { showToast('Please open the Reports tab first','error'); return; }
+
+  const FY_MONTHS = ['July','August','September','October','November','December',
+                      'January','February','March','April','May','June'];
+  const fyLabel = y => `FY${y}/${String((y + 1) % 100).padStart(2, '0')}`;
+  const fyMonths = startYear => FY_MONTHS.map((m, i) => ({
+    label: m + ' ' + (i < 6 ? startYear : startYear + 1),
+    short: m.slice(0, 3)
+  }));
+  const cnt = (month, cat) => data.filter(r => r.month === month && r.type === cat).length;
+
+  const years = hd.fyStartYears; // ascending, oldest → newest
+  const sectionEntries = hd.sectionEntries;
+  const totalCols = 1 + years.length * 13; // Category + (12 months + FY Total) per year
+
+  // ── Two-row header: year label spanning its 12 month columns, then month
+  // short-names + "FY Total" underneath ──
+  const headerRow1 = ['Category'];
+  const headerRow2 = [''];
+  years.forEach(y => {
+    headerRow1.push(fyLabel(y));
+    for (let i = 0; i < 12; i++) headerRow1.push('');
+    fyMonths(y).forEach(m => headerRow2.push(m.short));
+    headerRow2.push('FY Total');
+  });
+  const rows = [headerRow1, headerRow2];
+
+  const merges = [{ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }]; // Category spans both header rows
+  let mergeCol = 1;
+  years.forEach(() => {
+    merges.push({ s: { r: 0, c: mergeCol }, e: { r: 0, c: mergeCol + 11 } }); // year label spans its 12 month cols
+    mergeCol += 13;
+  });
+
+  const grandByYearMonth = years.map(() => new Array(12).fill(0));
+  const grandTotalByYear = new Array(years.length).fill(0);
+
+  sectionEntries.forEach(([label, cats]) => {
+    const activeCats = cats.filter(cat => years.some(y => fyMonths(y).some(m => cnt(m.label, cat) > 0)));
+    if (!activeCats.length) return;
+
+    rows.push([label.toUpperCase()].concat(Array(totalCols - 1).fill('')));
+
+    const secByYearMonth = years.map(() => new Array(12).fill(0));
+    const secTotalByYear = new Array(years.length).fill(0);
+
+    activeCats.forEach(cat => {
+      const row = [cat];
+      years.forEach((y, yi) => {
+        let yearTotal = 0;
+        fyMonths(y).forEach((m, mi) => {
+          const v = cnt(m.label, cat);
+          row.push(v || '');
+          secByYearMonth[yi][mi] += v;
+          yearTotal += v;
+        });
+        row.push(yearTotal);
+        secTotalByYear[yi] += yearTotal;
+      });
+      rows.push(row);
+    });
+
+    const subRow = ['Subtotal'];
+    years.forEach((y, yi) => {
+      secByYearMonth[yi].forEach((v, mi) => { subRow.push(v); grandByYearMonth[yi][mi] += v; });
+      subRow.push(secTotalByYear[yi]);
+      grandTotalByYear[yi] += secTotalByYear[yi];
+    });
+    rows.push(subRow);
+    rows.push(Array(totalCols).fill(''));
+  });
+
+  const grandRow = ['GRAND TOTAL'];
+  years.forEach((y, yi) => {
+    grandByYearMonth[yi].forEach(v => grandRow.push(v));
+    grandRow.push(grandTotalByYear[yi]);
+  });
+  rows.push(grandRow);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!merges'] = merges;
+  const cols = [{ wch: 30 }];
+  years.forEach(() => { for (let i = 0; i < 12; i++) cols.push({ wch: 6 }); cols.push({ wch: 10 }); });
+  ws['!cols'] = cols;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Historical Comparison');
+  XLSX.writeFile(wb, 'AMS_Historical_'+site.name.replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.xlsx');
+  showToast('Historical comparison exported ✓','success');
 }
 
 // ══ EXPORT INCIDENT LOG EXCEL ═════════════════════════════════════════════════
@@ -7030,15 +7632,144 @@ function generateMonthlyStatsPDF() {
   const histSection = document.getElementById('historical-section');
   if (histSection && histSection.style.display !== 'none') {
     const histMeta  = document.getElementById('historical-meta')?.outerHTML || '';
-    const histTbl   = document.getElementById('historical-table')?.outerHTML || '';
+    // Strip every inline min-width (the table itself is min-width:1500px, and
+    // each <th> carries its own e.g. min-width:170px — both sized for the
+    // dashboard's horizontal-scroll layout). Left in place, they'd stop the
+    // table from ever shrinking to fit one printed page no matter the font
+    // size. Other inline styles (colors, alignment) are left untouched.
+    const histTbl   = (document.getElementById('historical-table')?.outerHTML || '')
+      .replace(/min-width:\s*[\d.]+px;?/gi, '')
+      .replace(/width:\s*100%;?/gi, '');
     const emgWrap   = document.getElementById('emergency-table-wrap')?.innerHTML || '';
-    historicalHtml = '<div style="margin-top:28px;">'
-      + '<div style="font-size:15px;font-weight:800;color:#1a3a6b;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #1a3a6b;">📊 Centre Incidents Comparison — Historical</div>'
-      + histMeta + '<div style="overflow-x:auto;">' + histTbl + '</div>'
-      + '<div style="font-size:13px;font-weight:800;color:#1a3a6b;margin:18px 0 8px;">Emergency Incidents</div>'
-      + '<div style="overflow-x:auto;">' + emgWrap + '</div>'
+    // Own page: starts fresh (page-break-before). fitHistoricalTable() below
+    // sets a fixed, deliberately generous font-size — large regardless of how
+    // many rows/columns this site's category list has — and only reduces it
+    // in the rare case that's needed to stop columns clipping off the page
+    // edge. It does NOT try to force everything onto exactly one page: a
+    // table too long for that just continues onto a second page with the
+    // header row repeating, which is far better than shrinking text to the
+    // point it's hard to read.
+    historicalHtml = '<div class="hist-print-page">'
+      + '<div style="font-size:17px;font-weight:800;color:#1a3a6b;margin-bottom:9px;padding-bottom:7px;border-bottom:2px solid #1a3a6b;">📊 Centre Incidents Comparison — Historical</div>'
+      + histMeta
+      + '<div class="hist-fit-wrap" id="hist-fit-wrap">' + histTbl + '</div>'
+      + '</div>'
+      // Its own fresh page too — however tall the historical table above ends
+      // up (it can legitimately run long with many years/months of data),
+      // this must never crowd into it or sit underneath its last row.
+      + '<div class="hist-print-page">'
+      + '<div style="font-size:13px;font-weight:800;color:#1a3a6b;margin-bottom:8px;">Emergency Incidents</div>'
+      + '<div>' + emgWrap + '</div>'
       + '</div>';
   }
+
+  // Start #historical-table at a large, comfortably readable fixed size
+  // (13px — far bigger than the dashboard's own 11px). If that's too wide
+  // for the page (rare — only very wide month-by-month views with long
+  // category names), shrink it, but by CALCULATING the largest font that
+  // actually fits the page width — rather than jumping between a few coarse
+  // fixed stops (13 / 11 / 9.5 / 8 / 7). The old coarse-stop version could
+  // land two or three points smaller than necessary whenever the true fit
+  // fell between two stops (e.g. 11 overflowed by a little, so it fell all
+  // the way to 9.5 even though ~10.3 would have fit) — which is exactly
+  // what was still reading as "too small" after the width-vs-cascade bug
+  // was fixed. Table width scales close to linearly with font-size (column
+  // widths are content-driven via table-layout:auto), so one measurement at
+  // the max size lets the right target be computed directly instead of
+  // guessed; a short correction loop cleans up the small non-linearity from
+  // fixed-width borders. No attempt to force the WHOLE table onto one page
+  // by shrinking — a table with a long category list just continues onto a
+  // following page with the header row repeating, which stays legible
+  // rather than shrinking text down to fit an arbitrary height budget.
+  const historicalFitScript = historicalHtml ? (
+    '<script>'
+    + 'function fitHistoricalTable(){'
+    +   'var table=document.getElementById("historical-table");'
+    +   'if(!table)return;'
+    +   'var pxPerMm=3.7795;'
+    +   'var availW=(297-24-4)*pxPerMm;' // A4 landscape content width minus 12mm margins each side, minus a small safety pad
+    // A4 landscape content height minus margins, minus a safety pad. The pad
+    // here is deliberately generous (not just a couple of mm): this budget
+    // is checked against a row-by-row simulation using live on-screen DOM
+    // measurements (getBoundingClientRect()), which don't perfectly match
+    // Chromium's actual print-time pagination pixel-for-pixel — right at the
+    // edge of a page that small, consistent discrepancy is enough to tip a
+    // row onto a page the simulation didn't expect it on. A real margin here
+    // trades a little unused space for not silently landing back on the
+    // wrong side of a page-count boundary.
+    +   'var availH=(210-24-18)*pxPerMm;'
+    +   'var maxFont=13,minFont=7;'
+    +   'var thead=table.querySelector("thead");'
+    // The historical table sits below a heading and a meta line on its own
+    // printed page (see hist-print-page below) — real vertical space that a
+    // simulation must subtract from page 1's budget, or it'll assume more
+    // room on that first page than actually exists and mis-place the break.
+    +   'var page1El=table.closest(".hist-print-page")||table;'
+    // Simulates the browser's own print pagination exactly (whole rows only —
+    // a row that doesn't fit the remaining space on a page moves entirely to
+    // the next one, it's never split), rather than dividing total height by
+    // page height. That division only works out when a table's rows happen
+    // to end EXACTLY on a page boundary; in practice a row that's a few
+    // pixels too tall for what's left of a page pushes everything after it
+    // onto a fresh page, wasting whatever was left — a real effect a plain
+    // height/availH estimate misses entirely, and which was the actual cause
+    // of a still-mostly-blank last page even after row-height growth below.
+    +   'function simulate(){'
+    +     'var rows=table.querySelectorAll("tbody tr");'
+    +     'var th=thead?thead.getBoundingClientRect().height:0;'
+    +     'var headOffset=table.getBoundingClientRect().top-page1El.getBoundingClientRect().top;'
+    +     'var used=headOffset+th,pages=1;'
+    +     'for(var i=0;i<rows.length;i++){'
+    +       'var rh=rows[i].getBoundingClientRect().height;'
+    +       'if(used+rh>availH){pages++;used=th+rh;}else{used+=rh;}' // pages after the 1st start fresh with just the repeated header, no heading/meta
+    +     '}'
+    +     'return pages;'
+    +   '}'
+    +   'table.style.fontSize=maxFont+"px";'
+    +   'var w=table.scrollWidth;'
+    +   'if(w>availW){'
+    +     'var target=Math.max(minFont,Math.min(maxFont,maxFont*(availW/w)*0.985));'
+    +     'table.style.fontSize=target+"px";'
+    +     'var tries=0;'
+    +     'while(table.scrollWidth>availW && target>minFont && tries<8){'
+    +       'target=Math.max(minFont,target-0.3);'
+    +       'table.style.fontSize=target+"px";'
+    +       'tries++;'
+    +     '}'
+    +   '}'
+    // The font is now the largest that fits the page WIDTH — but that says
+    // nothing about height, and a slightly bigger font here can tip the
+    // total row count from N pages to N+1, whose mostly-empty last page
+    // looks worse than a touch-smaller font that stays at N pages. So:
+    // search downward from this width-fit font for the font that needs the
+    // FEWEST printed pages (using the real simulation above), and among
+    // fonts tied for that minimum, use the largest (best legibility) — never
+    // search below the width-fit font's floor, since going smaller than
+    // necessary for width was already the original problem this exists to fix.
+    +   'var fitFont=parseFloat(table.style.fontSize);'
+    +   'var testFonts=[];'
+    +   'for(var f=fitFont;f>minFont;f-=0.25)testFonts.push(f);'
+    +   'testFonts.push(minFont);'
+    +   'var pagesAt=testFonts.map(function(f){table.style.fontSize=f+"px";return simulate();});'
+    +   'var minPages=Math.min.apply(null,pagesAt);'
+    +   'var chosenFont=testFonts[pagesAt.indexOf(minPages)];'
+    +   'table.style.fontSize=chosenFont+"px";'
+    // Now grow the ROW height (vertical padding only, via a CSS custom
+    // property — never the font, which stays capped by width) to use up the
+    // leftover room on those minPages pages, again checked with the real
+    // row-by-row simulation rather than assumed — binary search for the
+    // largest growth factor that still simulates to minPages pages.
+    +   'var lo=1,hi=1.6,best=1;'
+    +   'for(var iter=0;iter<12;iter++){'
+    +     'var mid=(lo+hi)/2;'
+    +     'table.style.setProperty("--rowscale",mid);'
+    +     'if(simulate()<=minPages){best=mid;lo=mid;}else{hi=mid;}'
+    +   '}'
+    +   'table.style.setProperty("--rowscale",best);'
+    + '}'
+    + 'window.addEventListener("load", fitHistoricalTable);'
+    + '<' + '/script>'
+  ) : '';
 
   const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>'
     +'<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;padding:30px 40px;color:#1a1a1a;background:#fff;font-size:14px;}'
@@ -7076,11 +7807,58 @@ function generateMonthlyStatsPDF() {
     +'#monthly-tbl tr.sec-hdr td{background:#eef1f6!important;color:#1a3a6b!important;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.03em;padding:7px 12px;}'
     +'#monthly-tbl tr.sub-row td{background:#f4f7fb!important;font-weight:700;border-top:1px solid #c3cedc;}'
     +'#monthly-tbl tr.grand td{background:#1a3a6b!important;color:#fff!important;font-weight:800;font-size:14.5px;padding:9px 12px;}'
+
+    // Historical comparison — own printed page (see .hist-print-page below),
+    // scaled up to as large a font as fits by fitHistoricalTable() at the
+    // bottom of this document, so it prints large AND stays on one page.
+    // page-break-before starts this section on its own fresh page. Deliberately
+    // NOT page-break-inside:avoid, and the wrap below is NOT overflow:hidden —
+    // fitHistoricalTable() below targets one page, but if its estimate is ever
+    // slightly off, rows must flow onto a second page (with the header
+    // repeating), never be clipped and silently lost.
+    +'.hist-print-page{page-break-before:always;}'
+    +'.hist-fit-wrap{width:100%;}'
+    // width:auto overrides this document's global `table{width:100%}` rule
+    // (higher specificity here, #id beats tag) — without it, #historical-table
+    // gets stretched to the full page width no matter the font-size, which is
+    // what was silently forcing a tiny font in the fit script's shrink-to-fit
+    // math (it kept measuring a table stuck at the same stretched width).
+    +'#historical-table{border-collapse:collapse;table-layout:auto;font-size:13px;width:auto;}'
+    // No fixed font-size here — that would override the inline font-size
+    // fitHistoricalTable() sets on the <table> element (a same-element
+    // author style always wins over an inherited one). em-based padding so
+    // cell padding scales down/up together with whatever size the fit
+    // script lands on, instead of dominating the layout at small sizes.
+    // Vertical padding scales with --rowscale (set by fitHistoricalTable()
+    // below, based on leftover page height) independently of horizontal
+    // padding, which stays tied to font-size only — growing row height must
+    // never grow column width back past what fitHistoricalTable() measured.
+    +'#historical-table th,#historical-table td{border:1px solid #ccd3e0;padding:calc(0.4em * var(--rowscale,1)) 0.55em;white-space:nowrap;}'
+    +'#historical-table td:first-child,#historical-table th:first-child{text-align:left;white-space:normal;}'
+    +'#historical-table thead th{background:#1a3a6b!important;color:#fff!important;font-weight:700;}'
+    +'#historical-table tr.sec-hdr td{background:#eef1f6!important;color:#1a3a6b!important;font-weight:700;font-size:0.82em;text-transform:uppercase;letter-spacing:0.03em;}'
+    +'#historical-table tr.sub-row td{background:#f4f7fb!important;font-weight:700;border-top:1px solid #c3cedc;}'
+    +'#historical-table tr.grand td{background:#1a3a6b!important;color:#fff!important;font-weight:800;}'
+    +'#historical-table td.num{text-align:center;}'
+    +'#historical-table td.hi{font-weight:700;}'
+    +'#historical-table td.zero{color:#9aa5b1!important;}'
+    // The sparkline SVGs carry fixed width=64/height=22 pixel attributes from
+    // the dashboard — a fixed floor that stops rows (and so the whole table)
+    // from ever getting shorter than ~22px regardless of font-size. Forcing a
+    // font-relative size here lets them shrink or grow together with the text.
+    +'#historical-table svg{height:1.5em;width:auto;display:block;}'
+
     +'.badge-up{background:#fef2f2;color:#dc2626;font-size:12px;font-weight:600;padding:3px 7px;border-radius:4px;}'
     +'.badge-dn{background:#f0fdf4;color:#16a34a;font-size:12px;font-weight:600;padding:3px 7px;border-radius:4px;}'
     +'.badge-z{background:#f1f5f9;color:#64748b;font-size:12px;font-weight:600;padding:3px 7px;border-radius:4px;}'
 
-    +'@media print{.no-print{display:none!important;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}@page{size:landscape;margin:12mm;}}</style></head><body>'
+    // Explicit A4 landscape dimensions (not just the "landscape" orientation
+    // keyword) — fitHistoricalTable() below sizes the table against a 297mm
+    // page width; leaving the size unspecified lets some browsers/print
+    // dialogs fall back to a different default paper size (e.g. Letter,
+    // 279.4mm), which would make that math ~6% too generous and risk the
+    // table running past the true right margin.
+    +'@media print{.no-print{display:none!important;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}@page{size:297mm 210mm;margin:12mm;}}</style></head><body>'
     +'<div class="no-print" style="position:fixed;top:16px;right:16px;display:flex;gap:10px;">'
     +'<button onclick="window.print()" style="background:#1a3a6b;color:#fff;border:none;border-radius:6px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;">⬇ Download PDF</button>'
     +'<button onclick="window.close()" style="background:#555;color:#fff;border:none;border-radius:6px;padding:10px 22px;font-size:14px;cursor:pointer;">✕ Close</button></div>'
@@ -7095,6 +7873,7 @@ function generateMonthlyStatsPDF() {
     +'</div>'
     +tblHtml
     +historicalHtml
+    +historicalFitScript
     +'</body></html>';
   const w = window.open('','_blank');
   if (!w) { showToast('Allow popups to open the PDF','error'); return; }
