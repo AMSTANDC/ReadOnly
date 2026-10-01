@@ -734,8 +734,8 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
     <div style="font-family:var(--condensed);font-size:15px;font-weight:700;letter-spacing:0.5px;color:var(--dk-text);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--dk-gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
       <span>📊 CENTRE INCIDENTS COMPARISON — HISTORICAL</span>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <button class="dk-btn" onclick="generateComparisonPDF()" style="font-size:12px;padding:6px 14px;background:#1d9e75;color:#000;font-weight:700;">📄 Save as PDF</button>
-        <button class="dk-btn" onclick="exportHistoricalExcel()" style="font-size:12px;padding:6px 14px;background:rgba(34,197,94,0.15);color:#5DCAA5;border-color:rgba(34,197,94,0.3);">📊 Export Excel</button>
+        <button class="dk-btn" onclick="generateFYReportPDF()" title="Spreadsheet-style FY report: current year beside previous year, Jul–June + YTD, site config categories only" style="font-size:12px;padding:6px 14px;background:#2f5597;color:#fff;font-weight:700;border-color:#2f5597;">📋 FY Report PDF</button>
+        <button class="dk-btn" onclick="exportFYReportExcel()" title="Same FY report as a formatted Excel file" style="font-size:12px;padding:6px 14px;background:rgba(47,85,151,0.18);color:#9db8e8;border-color:rgba(47,85,151,0.5);">📋 FY Report Excel</button>
         <select id="historical-view-sel" onchange="_histViewMode=this.value;renderHistoricalComparison();"
           style="font-family:var(--sans);font-weight:500;font-size:12px;padding:6px 10px;border:1px solid var(--dk-border2);border-radius:7px;background:var(--dk-bg3);color:var(--dk-text);outline:none;cursor:pointer;color-scheme:dark;"></select>
       </div>
@@ -8857,6 +8857,297 @@ function closeEQPdfModal() {
   const modal = document.getElementById('eq-pdf-modal');
   if (modal) modal.style.display = 'none';
 }
+// ══ FY COMPARISON REPORT (spreadsheet layout) ════════════════════════════════
+// Current financial year block on the left, previous year on the right:
+// Category | Jul … June | YTD, a section header per config category group,
+// Subtotal per section, GRAND Total and Total Security Related Incidents.
+// Uses only the site's own config categories (getReportData) — every config
+// category is listed, including ones with no incidents yet.
+const FYR_MONTHS = ['July','August','September','October','November','December','January','February','March','April','May','June'];
+const FYR_SHORT  = ['Jul','Aug','Sept','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','June'];
+
+function _fyrSections(site, data) {
+  const code = (site.code || '').toUpperCase();
+  let cfg = null;
+  try { const raw = localStorage.getItem('ams_entry_cats_' + code); if (raw) cfg = JSON.parse(raw); } catch(e) {}
+  if (!cfg || !Object.keys(cfg).length) cfg = getCatsForSite(data, site.name || '', site.code || '').sections;
+  const overrides = SITE_TYPE_OVERRIDES_LC[code.toLowerCase()] || new Set();
+  const out = [];
+  Object.entries(cfg).forEach(([sec, cats]) => {
+    let list = Array.isArray(cats) ? cats.slice() : [];
+    if (sec.trim().toUpperCase() === 'OTHER') {
+      list = list.filter(c => overrides.has(String(c).toLowerCase()));
+      if (!list.length) return;
+    }
+    if (list.length) out.push({ key: sec, label: sec.replace(/\s+PRIORITY$/i, '').trim().toUpperCase(), cats: list });
+  });
+  return out;
+}
+
+function _fyrSecurityIdx(sections) {
+  const sec = sections.map((s,i) => /SECURITY/i.test(s.key) ? i : -1).filter(i => i >= 0);
+  if (sec.length) return sec;
+  const hm = sections.map((s,i) => /^(HIGH|MEDIUM)/i.test(s.key) ? i : -1).filter(i => i >= 0);
+  if (hm.length) return hm;
+  return sections.length ? [0] : [];
+}
+
+function _fyrPickYears(data) {
+  const CAL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let curY = null, prevY = null;
+  const m = /^detail-(\d{4})-(\d{4})$/.exec(_histViewMode || '');
+  if (m) { prevY = +m[1]; curY = +m[2]; }
+  if (curY === null) {
+    const starts = getSortedMonths(data).map(l => {
+      const [mn, y] = (l || '').split(' '); const i = CAL.indexOf(mn); const yy = parseInt(y, 10);
+      return (i < 0 || isNaN(yy)) ? null : (i >= 6 ? yy : yy - 1);
+    }).filter(v => v !== null);
+    const today = new Date();
+    curY = starts.length ? Math.max(...starts) : (today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1);
+    prevY = curY - 1;
+  }
+  return { curY, prevY };
+}
+
+// Column to highlight: the last completed month, if it falls in the current FY.
+function _fyrHighlightIdx(curY) {
+  const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1);
+  const fy = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1;
+  if (fy !== curY) return fy > curY ? 11 : 0;
+  return d.getMonth() >= 6 ? d.getMonth() - 6 : d.getMonth() + 6;
+}
+
+function buildFYReportModel() {
+  const site = getActiveSite();
+  if (!site) return null;
+  const data = getReportData(site);
+  const sections = _fyrSections(site, data);
+  if (!sections.length) return null;
+  const { curY, prevY } = _fyrPickYears(data);
+  const monthsOf = y => FYR_MONTHS.map((m, i) => m + ' ' + (i < 6 ? y : y + 1));
+  const tally = {};
+  data.forEach(r => { const k = r.month + '|' + r.type; tally[k] = (tally[k] || 0) + 1; });
+  const block = y => {
+    const months = monthsOf(y);
+    const secs = sections.map(s => {
+      const rows = s.cats.map(c => { const v = months.map(m => tally[m + '|' + c] || 0); return { cat: c, vals: v, ytd: v.reduce((a,b)=>a+b,0) }; });
+      const sub = months.map((_, i) => rows.reduce((a, r) => a + r.vals[i], 0));
+      return { label: s.label, key: s.key, rows, sub, subYtd: sub.reduce((a,b)=>a+b,0) };
+    });
+    const grand = months.map((_, i) => secs.reduce((a, s) => a + s.sub[i], 0));
+    const secIdx = _fyrSecurityIdx(sections);
+    const secTot = months.map((_, i) => secIdx.reduce((a, j) => a + secs[j].sub[i], 0));
+    return { y, label: y + '/' + (y + 1), secs, grand, grandYtd: grand.reduce((a,b)=>a+b,0), secTot, secTotYtd: secTot.reduce((a,b)=>a+b,0) };
+  };
+  return { site, cur: block(curY), prev: block(prevY), hl: _fyrHighlightIdx(curY) };
+}
+
+const FYR_SUB_FILLS = ['F4CCCC', 'D9D2E9', 'FCE4D6', 'DDEBF7', 'E2EFDA'];
+
+// ── PDF: drawn directly as a one-page A4 landscape PDF (jsPDF, loaded on
+// demand). Row height and font size shrink to whatever makes every row fit,
+// so the report is always exactly one page regardless of printer settings.
+function _loadJsPDF() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = () => (window.jspdf && window.jspdf.jsPDF) ? resolve(window.jspdf.jsPDF) : reject(new Error('jsPDF did not load'));
+    s.onerror = () => reject(new Error('Could not load the PDF tool (check internet connection)'));
+    document.head.appendChild(s);
+  });
+}
+
+async function generateFYReportPDF() {
+  const M = buildFYReportModel();
+  if (!M) { showToast('No categories or data for this site', 'error'); return; }
+  let jsPDF;
+  try { jsPDF = await _loadJsPDF(); } catch(e) { showToast(e.message, 'error'); return; }
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const PW = 297, PH = 210, MG = 8;
+  const rgb = hex => [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+
+  // ── Title ──
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(31, 56, 100);
+  doc.text(`Incident Statistics — ${M.site.name}`, MG, MG + 4);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(90, 90, 90);
+  doc.text(`${M.cur.label} compared with ${M.prev.label} · site config categories only`, MG, MG + 8.5);
+  doc.text('Generated ' + new Date().toLocaleDateString('en-AU', { day:'2-digit', month:'long', year:'numeric' }), PW - MG, MG + 8.5, { align: 'right' });
+  doc.setDrawColor(31, 56, 100); doc.setLineWidth(0.6); doc.line(MG, MG + 10.5, PW - MG, MG + 10.5);
+
+  // ── Geometry: two blocks side by side, every row must fit ──
+  const top = MG + 13;
+  const GAP = 6;
+  const blockW = (PW - 2 * MG - GAP) / 2;
+  const numW = Math.min(7.5, (blockW - 34) / 13);
+  const catW = blockW - numW * 13;
+  const nRows = 2 + M.cur.secs.reduce((a, s) => a + s.rows.length + 2, 0) + 2;
+  const rowH = Math.min(5, (PH - MG - top) / nRows);
+  const fs = Math.max(3.5, Math.min(8, rowH * 2.05));     // font size in pt
+  doc.setLineWidth(0.12); doc.setDrawColor(128, 128, 128);
+
+  const cell = (x, y, w, h, text, o = {}) => {
+    if (o.fill) { doc.setFillColor(...rgb(o.fill)); doc.rect(x, y, w, h, 'F'); }
+    if (o.border !== false) doc.rect(x, y, w, h, 'S');
+    if (text === undefined || text === null || text === '') return;
+    doc.setFont('helvetica', o.bold ? 'bold' : 'normal');
+    let size = o.size || fs;
+    doc.setFontSize(size);
+    let t = String(text);
+    const maxW = w - 1.2;
+    while (doc.getTextWidth(t) > maxW && size > 3) { size -= 0.25; doc.setFontSize(size); }
+    while (doc.getTextWidth(t) > maxW && t.length > 3) t = t.slice(0, -2) + '…';
+    const c = o.color ? rgb(o.color) : [0, 0, 0];
+    doc.setTextColor(...c);
+    const ty = y + h / 2 + (size * 0.3528) * 0.35;
+    if (o.align === 'left') doc.text(t, x + 0.7, ty);
+    else if (o.align === 'right') doc.text(t, x + w - 0.7, ty, { align: 'right' });
+    else doc.text(t, x + w / 2, ty, { align: 'center' });
+  };
+
+  const drawBlock = (B, x0) => {
+    let y = top;
+    const colX = i => x0 + catW + i * numW;          // i = 0..12 (12 = YTD)
+    // header
+    cell(x0, y, catW, rowH * 2, 'Category', { fill: 'DCE6F1', bold: true, size: fs + 1 });
+    cell(colX(0), y, numW * 13, rowH, B.label, { fill: '2F5597', bold: true, color: 'FFFFFF', size: fs + 1 });
+    y += rowH;
+    FYR_SHORT.concat(['YTD']).forEach((m, i) => cell(colX(i), y, numW, rowH, m, { bold: true, fill: i === 12 ? '92D050' : (i === M.hl ? 'FFC000' : 'DCE6F1') }));
+    y += rowH;
+    B.secs.forEach((s, si) => {
+      cell(x0, y, catW, rowH, '');
+      cell(colX(0), y, numW * 12, rowH, s.label, { bold: true });
+      cell(colX(12), y, numW, rowH, '', { fill: '92D050' });
+      y += rowH;
+      s.rows.forEach(r => {
+        cell(x0, y, catW, rowH, r.cat, { align: 'left' });
+        r.vals.forEach((v, i) => cell(colX(i), y, numW, rowH, v, i === M.hl ? { fill: 'FFC000', bold: true } : {}));
+        cell(colX(12), y, numW, rowH, r.ytd, { fill: '92D050', bold: true });
+        y += rowH;
+      });
+      const sf = FYR_SUB_FILLS[si % FYR_SUB_FILLS.length];
+      cell(x0, y, catW, rowH, 'Subtotal', { align: 'right', bold: true });
+      s.sub.forEach((v, i) => cell(colX(i), y, numW, rowH, v, { bold: true, fill: i === M.hl ? 'F4B183' : sf }));
+      cell(colX(12), y, numW, rowH, s.subYtd, { fill: '92D050', bold: true });
+      y += rowH;
+    });
+    [['GRAND Total', B.grand, B.grandYtd], ['Total Security Related Incidents', B.secTot, B.secTotYtd]].forEach(([lbl, vals, ytd]) => {
+      cell(x0, y, catW, rowH, lbl, { align: 'right', bold: true });
+      vals.forEach((v, i) => cell(colX(i), y, numW, rowH, v, i === M.hl ? { fill: 'FFFF00', bold: true } : { bold: true }));
+      cell(colX(12), y, numW, rowH, ytd, { fill: '92D050', bold: true });
+      y += rowH;
+    });
+  };
+  drawBlock(M.cur, MG);
+  drawBlock(M.prev, MG + blockW + GAP);
+
+  const fname = `${(M.site.name || 'Site').replace(/[^\w\- ]+/g, '').trim()} Incident Statistics ${M.cur.label.replace('/', '-')}.pdf`;
+  doc.save(fname);
+  showToast('FY report PDF saved ✓', 'success');
+}
+
+// ── Excel (styled, via ExcelJS loaded on demand) ─────────────────────────────
+function _loadExcelJS() {
+  if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+    s.onload = () => window.ExcelJS ? resolve(window.ExcelJS) : reject(new Error('ExcelJS did not load'));
+    s.onerror = () => reject(new Error('Could not load ExcelJS (check internet connection)'));
+    document.head.appendChild(s);
+  });
+}
+
+async function exportFYReportExcel() {
+  const M = buildFYReportModel();
+  if (!M) { showToast('No categories or data for this site', 'error'); return; }
+  let ExcelJS;
+  try { ExcelJS = await _loadExcelJS(); } catch(e) { showToast(e.message, 'error'); return; }
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet(M.cur.label.replace('/', '-'), {
+    pageSetup: { orientation: 'landscape', paperSize: 8, fitToPage: true, fitToWidth: 1, fitToHeight: 1 },
+    views: [{ showGridLines: false }]
+  });
+  const thin = { style: 'thin', color: { argb: 'FF808080' } };
+  const border = { top: thin, left: thin, bottom: thin, right: thin };
+  const fill = hex => ({ type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + hex } });
+
+  const BLOCK_W = 14;          // Category + 12 months + YTD
+  const GAP = 2;               // blank columns between the two blocks
+  const writeBlock = (B, col0) => {
+    // widths
+    ws.getColumn(col0).width = 30;
+    for (let i = 1; i <= 13; i++) ws.getColumn(col0 + i).width = 6;
+    let r = 1;
+    // header rows
+    ws.mergeCells(r, col0, r + 1, col0);
+    const ch = ws.getCell(r, col0); ch.value = 'Category';
+    ch.font = { bold: true, size: 11 }; ch.alignment = { horizontal: 'center', vertical: 'middle' }; ch.fill = fill('DCE6F1');
+    ws.mergeCells(r, col0 + 1, r, col0 + 13);
+    const yh = ws.getCell(r, col0 + 1); yh.value = B.label;
+    yh.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }; yh.alignment = { horizontal: 'center' }; yh.fill = fill('2F5597');
+    r++;
+    FYR_SHORT.concat(['YTD']).forEach((m, i) => {
+      const c = ws.getCell(r, col0 + 1 + i); c.value = m; c.font = { bold: true };
+      c.alignment = { horizontal: 'center' };
+      c.fill = fill(i === 12 ? '92D050' : (i === M.hl ? 'FFC000' : 'DCE6F1'));
+    });
+    for (let cc = col0; cc <= col0 + 13; cc++) { ws.getCell(1, cc).border = border; ws.getCell(2, cc).border = border; }
+    r++;
+    B.secs.forEach((s, si) => {
+      ws.mergeCells(r, col0 + 1, r, col0 + 12);
+      const sc = ws.getCell(r, col0 + 1); sc.value = s.label; sc.font = { bold: true }; sc.alignment = { horizontal: 'center' };
+      ws.getCell(r, col0).border = border; sc.border = border;
+      const sy = ws.getCell(r, col0 + 13); sy.fill = fill('92D050'); sy.border = border;
+      r++;
+      s.rows.forEach(row => {
+        const nc = ws.getCell(r, col0); nc.value = row.cat; nc.border = border;
+        row.vals.forEach((v, i) => {
+          const c = ws.getCell(r, col0 + 1 + i); c.value = v; c.alignment = { horizontal: 'center' }; c.border = border;
+          if (i === M.hl) { c.fill = fill('FFC000'); c.font = { bold: true }; }
+        });
+        const yc = ws.getCell(r, col0 + 13); yc.value = row.ytd; yc.font = { bold: true }; yc.alignment = { horizontal: 'center' };
+        yc.fill = fill('92D050'); yc.border = border;
+        r++;
+      });
+      const subFill = FYR_SUB_FILLS[si % FYR_SUB_FILLS.length];
+      const lc = ws.getCell(r, col0); lc.value = 'Subtotal'; lc.font = { bold: true }; lc.alignment = { horizontal: 'right' };
+      lc.border = border;
+      s.sub.forEach((v, i) => {
+        const c = ws.getCell(r, col0 + 1 + i); c.value = v; c.font = { bold: true }; c.alignment = { horizontal: 'center' };
+        c.fill = fill(i === M.hl ? 'F4B183' : subFill); c.border = border;
+      });
+      const yc = ws.getCell(r, col0 + 13); yc.value = s.subYtd; yc.font = { bold: true }; yc.alignment = { horizontal: 'center' };
+      yc.fill = fill('92D050'); yc.border = border;
+      r++;
+    });
+    [['GRAND Total', B.grand, B.grandYtd], ['Total Security Related Incidents', B.secTot, B.secTotYtd]].forEach(([lbl, vals, ytd]) => {
+      const lc = ws.getCell(r, col0); lc.value = lbl; lc.font = { bold: true }; lc.alignment = { horizontal: 'right' }; lc.border = border;
+      vals.forEach((v, i) => {
+        const c = ws.getCell(r, col0 + 1 + i); c.value = v; c.font = { bold: true }; c.alignment = { horizontal: 'center' }; c.border = border;
+        if (i === M.hl) c.fill = fill('FFFF00');
+      });
+      const yc = ws.getCell(r, col0 + 13); yc.value = ytd; yc.font = { bold: true }; yc.alignment = { horizontal: 'center' };
+      yc.fill = fill('92D050'); yc.border = border;
+      r++;
+    });
+  };
+  writeBlock(M.cur, 1);
+  for (let g = 1; g <= GAP; g++) ws.getColumn(BLOCK_W + g).width = 3;
+  writeBlock(M.prev, BLOCK_W + GAP + 1);
+
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(M.site.name || 'Site').replace(/[^\w\- ]+/g, '').trim()} Incident Statistics ${M.cur.label.replace('/', '-')}.xlsx`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  showToast('FY report exported ✓', 'success');
+}
+
 function generateComparisonPDF() {
   const site = getActiveSite();
   const today = new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'long',year:'numeric'});
