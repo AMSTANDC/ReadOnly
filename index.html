@@ -4919,7 +4919,8 @@ function updateOverviewTiles() {
 
   // ── Comms badge ────────────────────────────────────────────────────────────
   let unreadComms = 0;
-  sites.forEach(s => { (s.commsLog||[]).forEach(m => { if ((m.acknowledgements||[]).length===0) unreadComms++; }); });
+  // Only guard messages flagged for the manager trigger the NEW badge.
+  sites.forEach(s => { (s.commsLog||[]).forEach(m => { if (m.forManager && !m.fromManager && (m.acknowledgements||[]).length===0) unreadComms++; }); });
   const commsBadge = document.getElementById('ov-comms-badge');
   if (commsBadge) commsBadge.style.display = unreadComms > 0 ? 'block' : 'none';
 
@@ -4950,11 +4951,13 @@ function updateOverviewTiles() {
 }
 
 function updateCommsNavBadge() {
-  // Count unread messages that are from management OR flagged for manager attention
+  // Count only unread guard messages flagged for manager attention — the
+  // manager's own posts to guards (and ordinary guard-to-guard entries)
+  // never trigger the badge.
   let unread = 0;
   sites.forEach(s => {
     (s.commsLog||[])
-      .filter(m => m.fromManager || m.forManager)
+      .filter(m => m.forManager && !m.fromManager)
       .forEach(m => { if ((m.acknowledgements||[]).length === 0) unread++; });
   });
   const badge = document.getElementById('ov-comms-badge');
