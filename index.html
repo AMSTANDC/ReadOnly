@@ -29,12 +29,12 @@ body{font-family:var(--sans);background:var(--dk-bg);color:var(--text);font-size
 
 /* ── HEADER ── */
 header{
-  background:linear-gradient(135deg,#0a1520 0%,#0f1923 100%);
-  border-bottom:3px solid #1d9e75;
+  background:linear-gradient(135deg,#090e15 0%,#111923 100%);
+  border-bottom:2px solid var(--dk-gold);
   padding:0 32px;height:62px;
   display:flex;align-items:center;gap:18px;
   position:sticky;top:0;z-index:200;
-  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  box-shadow:0 4px 20px rgba(0,0,0,0.6);
 }
 .logo{height:40px;padding:0 13px;background:var(--gold);border-radius:5px;
   display:flex;align-items:center;justify-content:center;
@@ -228,6 +228,7 @@ table.log-tbl{width:100%;border-collapse:collapse;font-size:13px;}
 #toast.error{background:var(--danger);}
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes commsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.05)}}
 @keyframes aasUnreadGlow{
   0%,100%{ box-shadow:0 0 6px 1px rgba(240,153,123,0.55); }
   50%{ box-shadow:0 0 18px 5px rgba(240,153,123,0.95); }
@@ -246,39 +247,42 @@ table.log-tbl{width:100%;border-collapse:collapse;font-size:13px;}
   .site-sel-bar{padding:8px 16px;}
 }
 
-/* ── DARK PANEL (Overview + Log) ── */
+/* ── ENTRY MASTER MATCHED THEME ── */
 :root{
-  --dk-bg:     #0f1923;
-  --dk-bg2:    #162230;
-  --dk-bg3:    #1a2a3a;
-  --dk-bg4:    #1e3040;
-  --dk-border: rgba(30,48,64,0.9);
-  --dk-border2:rgba(50,80,100,0.8);
-  --dk-text:   #e2e8f0;
-  --dk-text2:  #9ab4c4;
-  --dk-text3:  #64889a;
-  --dk-gold:   #ffffff;
-  --dk-success:#1d9e75;
-  --dk-danger: #d85a30;
-  --dk-warn:   #ef9f27;
+  --dk-bg:     #0f1419;
+  --dk-bg2:    #161d26;
+  --dk-bg3:    #1c2535;
+  --dk-bg4:    #243044;
+  --dk-border: rgba(255,255,255,0.08);
+  --dk-border2:rgba(255,255,255,0.12);
+  --dk-text:   #e8eef5;
+  --dk-text2:  #94a8be;
+  --dk-text3:  #5a7191;
+  --dk-gold:   #c9973a;
+  --dk-success:#22c55e;
+  --dk-danger: #ef4444;
+  --dk-warn:   #f59e0b;
 }
 
-/* ── LIGHT THEME OVERRIDE ── */
-body.light-mode {
-  --dk-bg:     #f0f4f8;
-  --dk-bg2:    #ffffff;
-  --dk-bg3:    #e8eef5;
-  --dk-bg4:    #dde6ef;
-  --dk-border: rgba(0,0,0,0.10);
-  --dk-border2:rgba(0,0,0,0.16);
-  --dk-text:   #0f1419;
-  --dk-text2:  #3a4e62;
-  --dk-text3:  #6b8099;
-  --dk-gold:   #b07a1e;
-  --dk-success:#16a34a;
-  --dk-danger: #dc2626;
-  --dk-warn:   #d97706;
+/* ── DARK MODE OVERRIDE ── */
+body.dark-mode {
+  --dk-bg:     #090e15;
+  --dk-bg2:    #0f1419;
+  --dk-bg3:    #161d26;
+  --dk-bg4:    #1c2535;
+  --dk-border: rgba(255,255,255,0.06);
+  --dk-border2:rgba(255,255,255,0.10);
+  --dk-text:   #e8eef5;
+  --dk-text2:  #94a8be;
+  --dk-text3:  #5a7191;
+  --dk-gold:   #c9973a;
 }
+body.dark-mode .dk-action-tile{
+  background:#162230;border-color:#1e3040;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+body.dark-mode .dk-action-tile:hover{border-color:#378add;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+body.dark-mode .dk-at-label{color:#9ab4c4;}
 /* Keep header always dark */
 body.light-mode header {
   background:linear-gradient(135deg,#0a1520 0%,#1a2e45 100%)!important;
@@ -365,15 +369,16 @@ body.light-mode .dk-empty { color:#3a4e62!important; }
 /* Action tiles — top-level actions (replaces nav-bar tabs + per-card buttons) */
 .dk-action-tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
 .dk-action-tile{
-  background:#162230;border:1px solid #1e3040;border-radius:10px;
+  background:var(--dk-bg2);border:1px solid var(--dk-border2);border-radius:12px;
   padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
-  cursor:pointer;transition:all 0.15s;text-align:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  cursor:pointer;transition:border-color .15s,transform .1s;text-align:center;
+  box-shadow:none;
 }
-.dk-action-tile:hover{border-color:#378add;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+.dk-action-tile:active{transform:scale(0.97);}
+.dk-action-tile:hover{border-color:var(--dk-gold);}
 .dk-at-icon{font-size:24px;line-height:1;}
-.dk-at-label{font-size:12px;font-weight:700;color:#9ab4c4;}
-.dk-action-tile:hover .dk-at-label{color:#85B7EB;}
+.dk-at-label{font-size:12px;font-weight:700;color:var(--dk-text);letter-spacing:0.3px;text-transform:uppercase;}
+.dk-action-tile:hover .dk-at-label{color:var(--dk-gold);}
 @media(max-width:900px){ .dk-action-tiles{grid-template-columns:repeat(3,1fr);} }
 
 /* Dark overview stats bar */
@@ -582,6 +587,7 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
 
 <div class="nav-bar">
   <div class="nav-tab active" onclick="showTab('overview',this)">🏠 Overview</div>
+  <div class="nav-tab" onclick="showTab('admin',this);renderAdminTab();">⚙ Admin</div>
 </div>
 
 <!-- Site selector bar (shows on report/log tabs) -->
@@ -595,15 +601,94 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
 <div class="panel active dark-panel" id="panel-overview" style="background:var(--dk-bg);min-height:calc(100vh - 110px);">
   <div style="max-width:1500px;margin:0 auto;padding:24px 32px;">
 
-  <!-- Action tiles -->
-  <div class="dk-action-tiles">
-    <div class="dk-action-tile" onclick="showTab('log')"><span class="dk-at-icon">📋</span><span class="dk-at-label">Incident Log</span></div>
-    <div class="dk-action-tile" onclick="showTab('reports')"><span class="dk-at-icon">📊</span><span class="dk-at-label">Reports</span></div>
-    <div class="dk-action-tile" onclick="openPOIPicker()"><span class="dk-at-icon">📍</span><span class="dk-at-label">POI</span></div>
-    <a class="dk-action-tile" id="policies-tile" href="#" target="_blank" rel="noopener" style="text-decoration:none;"><span class="dk-at-icon">📜</span><span class="dk-at-label">Policies &amp; Procedures</span></a>
-    <div class="dk-action-tile" onclick="showTab('admin');renderAdminTab();"><span class="dk-at-icon">⚙</span><span class="dk-at-label">Admin</span></div>
+  <!-- Refresh bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div id="ov-sync-status" style="font-size:12px;color:var(--dk-text3);">Loading sites…</div>
+    <button onclick="refreshOverview()" id="ov-refresh-btn" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+      <span id="ov-refresh-icon">↺</span> Refresh
+    </button>
   </div>
 
+  <!-- ── ROW 1: Main navigation ─────────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+
+    <div class="dk-action-tile" onclick="showTab('log')" style="padding:18px 20px;display:flex;align-items:center;gap:16px;background:rgba(234,179,8,0.2);border-color:rgba(234,179,8,0.6);">
+      <span class="dk-at-icon" style="font-size:28px;margin:0;">📋</span>
+      <div>
+        <div class="dk-at-label" style="font-size:15px;margin-bottom:6px;color:#fef9c3;">Incident Log</div>
+        <div style="display:flex;gap:12px;">
+          <span style="font-size:12px;color:var(--dk-text3);">This month: <strong id="ov-stat-this-month" style="color:#fcd34d;">—</strong></span>
+          <span style="font-size:12px;color:var(--dk-text3);">Last 12M: <strong id="ov-stat-12m" style="color:#fcd34d;">—</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dk-action-tile" onclick="showTab('comms')" style="padding:18px 14px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(99,102,241,0.2);border-color:rgba(99,102,241,0.5);">
+      <span class="dk-at-icon" style="font-size:26px;margin:0;">📨</span>
+      <span class="dk-at-label" style="color:#a5b4fc;">Comms Log</span>
+      <div id="ov-comms-badge" style="display:none;position:absolute;top:8px;right:8px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;background:#ef4444;color:#fff;animation:commsPulse 0.8s infinite;">NEW</div>
+    </div>
+
+    <div class="dk-action-tile" onclick="showTab('reports')" style="padding:18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(59,130,246,0.2);border-color:rgba(59,130,246,0.5);">
+      <span class="dk-at-icon" style="font-size:26px;margin:0;">📊</span>
+      <span class="dk-at-label" style="color:#93c5fd;">Reports</span>
+    </div>
+  </div>
+
+  <!-- ── ROW 2: Registers ───────────────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;">
+
+    <div class="dk-action-tile" id="ov-isolations-tile" onclick="openAllIsolationsModal()" style="padding:18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;background:rgba(132,204,22,0.2);border-color:rgba(132,204,22,0.5);">
+      <span style="font-size:22px;">🔒</span>
+      <span class="dk-at-label" style="color:#bef264;">Isolated</span>
+      <span id="ov-isolations-count" style="font-size:20px;font-weight:800;color:#bef264;">—</span>
+    </div>
+
+    <div class="dk-action-tile" id="ov-permits-tile" onclick="openAllPermitsModal()" style="padding:18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.5);">
+      <span style="font-size:22px;">📋</span>
+      <span class="dk-at-label" style="color:#c4b5fd;">Active Permits</span>
+      <span id="ov-permits-count" style="font-size:20px;font-weight:800;color:#c4b5fd;">—</span>
+    </div>
+
+    <div class="dk-action-tile" id="ov-keys-tile" onclick="openAllKeysModal()" style="padding:18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;background:rgba(6,182,212,0.2);border-color:rgba(6,182,212,0.5);">
+      <span style="font-size:22px;">🔑</span>
+      <span class="dk-at-label" style="color:#67e8f9;">Keys Out</span>
+      <span id="ov-keys-count" style="font-size:20px;font-weight:800;color:#67e8f9;">—</span>
+    </div>
+
+    <div class="dk-action-tile" id="ov-lost-tile" onclick="openAllLostPropertyModal()" style="padding:18px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;background:rgba(236,72,153,0.2);border-color:rgba(236,72,153,0.5);">
+      <span style="font-size:22px;">🎒</span>
+      <span class="dk-at-label" style="color:#f9a8d4;">Lost Property</span>
+      <span id="ov-lost-count" style="font-size:20px;font-weight:800;color:#f9a8d4;">—</span>
+    </div>
+  </div>
+
+  <!-- ── ROW 3: Links & Compliance ────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;">
+    <div class="dk-action-tile" onclick="openPOIPicker()" style="padding:14px;display:flex;align-items:center;gap:12px;background:rgba(20,184,166,0.2);border-color:rgba(20,184,166,0.5);">
+      <span style="font-size:24px;">📍</span>
+      <span class="dk-at-label" style="color:#99f6e4;">POI Register</span>
+    </div>
+    <a class="dk-action-tile" id="policies-tile" href="#" target="_blank" rel="noopener" style="text-decoration:none;padding:14px;display:flex;align-items:center;gap:12px;background:rgba(236,72,153,0.2);border-color:rgba(236,72,153,0.5);">
+      <span style="font-size:24px;">📜</span>
+      <span class="dk-at-label" style="color:#f9a8d4;">Policies &amp; Procedures</span>
+    </a>
+    <div class="dk-action-tile" onclick="openAllFaultsModal()" style="padding:14px;display:flex;align-items:center;gap:12px;position:relative;background:rgba(249,115,22,0.2);border-color:rgba(249,115,22,0.5);">
+      <span style="font-size:24px;">⚠️</span>
+      <div>
+        <div class="dk-at-label" style="color:#fdba74;">Equipment Faults</div>
+        <div id="ov-faults-sub" style="font-size:11px;color:var(--dk-text3);margin-top:2px;">Loading…</div>
+      </div>
+      <div id="ov-faults-badge" style="display:none;position:absolute;top:8px;right:8px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;background:#f59e0b;color:#000;animation:commsPulse 0.8s infinite;">!</div>
+    </div>
+    <div class="dk-action-tile" onclick="showTab('aas');renderAASPanel();" style="padding:14px;display:flex;align-items:center;gap:12px;background:rgba(217,70,239,0.2);border-color:rgba(217,70,239,0.5);">
+      <span style="font-size:24px;">⚔️</span>
+      <span class="dk-at-label" style="color:#f0abfc;">Acts Against Security</span>
+    </div>
+  </div>
+
+    <!-- Site overview section — hidden when only one site is configured -->
+  <div id="multi-site-section">
   <div class="page-hdr" style="margin-bottom:20px;">
     <div>
       <div class="page-title" style="color:var(--dk-text);font-size:22px;" id="overview-title">Overview — All Sites</div>
@@ -619,14 +704,9 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
       <button class="dk-btn" onclick="openMgrExport()" style="font-size:13px;padding:7px 16px;background:rgba(34,197,94,0.15);color:#5DCAA5;border-color:rgba(34,197,94,0.3);">📊 Export to Excel</button>
     </div>
   </div>
-
-  <!-- Global stats bar -->
   <div class="dk-overview-bar" id="overview-stats-bar" style="display:none;"></div>
-
-  <!-- Site cards -->
   <div class="dk-section-hdr" id="sites-section-hdr">Sites</div>
   <div class="site-grid" id="site-cards-grid"></div>
-
   <div id="overview-no-sites" style="display:none;">
     <div class="dk-empty">
       <div class="icon">🏢</div>
@@ -635,6 +715,7 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
       <button class="dk-btn primary" onclick="showTab('admin');renderAdminTab();">⚙ Configure Sites</button>
     </div>
   </div>
+  </div><!-- end multi-site-section -->
   </div>
 </div>
 
@@ -647,7 +728,30 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
   </div>
 
   <div id="reports-monthly-view">
-  <div style="padding:16px 32px 0;flex-shrink:0;">
+
+  <!-- ── CENTRE INCIDENTS COMPARISON (top) ── -->
+  <div id="historical-section" style="margin-bottom:28px;">
+    <div style="font-family:var(--condensed);font-size:15px;font-weight:700;letter-spacing:0.5px;color:var(--dk-text);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--dk-gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <span>📊 CENTRE INCIDENTS COMPARISON — HISTORICAL</span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="dk-btn" onclick="generateComparisonPDF()" style="font-size:12px;padding:6px 14px;background:#1d9e75;color:#000;font-weight:700;">📄 Save as PDF</button>
+        <button class="dk-btn" onclick="exportHistoricalExcel()" style="font-size:12px;padding:6px 14px;background:rgba(34,197,94,0.15);color:#5DCAA5;border-color:rgba(34,197,94,0.3);">📊 Export Excel</button>
+        <select id="historical-view-sel" onchange="_histViewMode=this.value;renderHistoricalComparison();"
+          style="font-family:var(--sans);font-weight:500;font-size:12px;padding:6px 10px;border:1px solid var(--dk-border2);border-radius:7px;background:var(--dk-bg3);color:var(--dk-text);outline:none;cursor:pointer;color-scheme:dark;"></select>
+      </div>
+    </div>
+    <div id="historical-meta" style="font-size:11px;color:var(--dk-text3);margin-bottom:12px;"></div>
+    <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--dk-border);">
+      <table id="historical-table" class="rtbl dk-rtbl" style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;min-width:1500px;"></table>
+    </div>
+    <div style="margin-top:16px;" id="emergency-table-section">
+      <div id="emergency-table-title" style="font-family:var(--condensed);font-size:14px;font-weight:700;color:var(--dk-text);margin-bottom:8px;">NOTABLE INCIDENTS</div>
+      <div id="emergency-table-wrap" style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--dk-border);"></div>
+    </div>
+  </div>
+
+  <!-- ── MONTHLY STATS (below comparison) ── -->
+  <div style="border-top:1px solid var(--dk-border);padding-top:24px;">
   <div class="page-hdr" style="margin-bottom:16px;">
     <div>
       <div class="page-title" style="color:var(--dk-text);font-size:21px;" id="monthly-title">Monthly Report</div>
@@ -685,27 +789,8 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
       <table class="rtbl dk-rtbl" id="monthly-tbl" style="font-size:13px;"></table>
     </div>
   </div>
-</div>
+  </div><!-- /monthly stats -->
 
-  <!-- Historical Comparison Table -->
-  <div id="historical-section" style="display:none;margin-top:24px;">
-    <div style="font-family:var(--condensed);font-size:15px;font-weight:700;letter-spacing:0.5px;color:var(--dk-text);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--dk-gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <span>📊 CENTRE INCIDENTS COMPARISON — HISTORICAL</span>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button class="dk-btn" onclick="exportHistoricalExcel()" style="font-size:12px;padding:6px 14px;background:rgba(34,197,94,0.15);color:#5DCAA5;border-color:rgba(34,197,94,0.3);">📊 Export Excel</button>
-        <select id="historical-view-sel" onchange="_histViewMode=this.value;renderHistoricalComparison();"
-          style="font-family:var(--sans);font-weight:500;font-size:12px;padding:6px 10px;border:1px solid var(--dk-border2);border-radius:7px;background:var(--dk-bg3);color:var(--dk-text);outline:none;cursor:pointer;color-scheme:dark;"></select>
-      </div>
-    </div>
-    <div id="historical-meta" style="font-size:11px;color:var(--dk-text3);margin-bottom:12px;"></div>
-    <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--dk-border);">
-      <table id="historical-table" class="rtbl dk-rtbl" style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;min-width:1500px;"></table>
-    </div>
-    <div style="margin-top:16px;" id="emergency-table-section">
-      <div id="emergency-table-title" style="font-family:var(--condensed);font-size:14px;font-weight:700;color:var(--dk-text);margin-bottom:8px;">NOTABLE INCIDENTS</div>
-      <div id="emergency-table-wrap" style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--dk-border);"></div>
-    </div>
-  </div>
   </div><!-- /reports-monthly-view -->
 
   <div id="reports-ytd-view" style="display:none;">
@@ -761,6 +846,60 @@ table.dk-rtbl tr.grand td{background:var(--dk-gold)!important;color:#0a0e14!impo
 
 <!-- ═══ SITES SETTINGS ═══ -->
 
+
+<div class="panel dark-panel" id="panel-comms" style="background:var(--dk-bg);min-height:calc(100vh - 110px);padding:24px 32px;">
+  <div style="max-width:900px;margin:0 auto;">
+    <div class="page-hdr" style="margin-bottom:20px;">
+      <div>
+        <div class="page-title" style="color:var(--dk-text);font-size:22px;">📨 Comms Log — Manager View</div>
+        <div class="page-sub" style="color:var(--dk-text2);" id="comms-panel-sub">Messages sent to guards · Guard messages flagged for manager attention</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="comms-site-filter" onchange="renderCommsPanel()" style="background:var(--dk-bg3);border:1px solid #1e3040;color:var(--dk-text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;color-scheme:dark;">
+          <option value="__all__">All Sites</option>
+        </select>
+        <select id="comms-priority-filter" onchange="renderCommsPanel()" style="background:var(--dk-bg3);border:1px solid #1e3040;color:var(--dk-text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;color-scheme:dark;">
+          <option value="">All Priorities</option>
+          <option value="Action Required">🔴 Action Required</option>
+          <option value="Urgent">🟡 Urgent</option>
+          <option value="Routine">🟢 Routine</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;color:var(--dk-text2);font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="comms-unread-only" onchange="renderCommsPanel()"> Unread only
+        </label>
+      </div>
+    </div>
+
+    <!-- Manager compose form -->
+    <div style="background:var(--dk-bg2);border:1px solid #1e3040;border-left:3px solid var(--dk-gold);border-radius:10px;padding:18px;margin-bottom:22px;">
+      <div style="font-size:12px;font-weight:700;color:var(--dk-gold);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;">📤 Send Message to Site</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--dk-text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Site <span style="color:#ef4444;">*</span></label>
+          <select id="mgr-comms-site" style="width:100%;background:var(--dk-bg3);border:1px solid #1e3040;color:var(--dk-text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;color-scheme:dark;">
+            <option value="">— Select site —</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--dk-text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Your Name <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="mgr-comms-author" placeholder="e.g. Centre Manager" style="width:100%;background:var(--dk-bg3);border:1px solid #1e3040;color:var(--dk-text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--dk-text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Priority</label>
+          <select id="mgr-comms-priority" style="width:100%;background:var(--dk-bg3);border:1px solid #1e3040;color:var(--dk-text);padding:8px 12px;border-radius:8px;font-size:13px;outline:none;color-scheme:dark;">
+            <option value="Routine">🟢 Routine</option>
+            <option value="Urgent">🟡 Urgent</option>
+            <option value="Action Required">🔴 Action Required</option>
+          </select>
+        </div>
+      </div>
+      <textarea id="mgr-comms-message" placeholder="Enter your message for the security team…" style="width:100%;background:var(--dk-bg3);border:1px solid #1e3040;color:var(--dk-text);padding:10px 12px;border-radius:8px;font-size:14px;outline:none;resize:vertical;min-height:80px;line-height:1.5;margin-bottom:12px;"></textarea>
+      <button onclick="postManagerComms()" style="background:rgba(201,151,58,0.2);border:1px solid rgba(201,151,58,0.5);color:var(--dk-gold);padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">📤 Post Message to Guards</button>
+    </div>
+
+    <div id="comms-panel-list"></div>
+  </div>
+</div>
 
 <div class="panel main" id="panel-admin">
   <div class="page-hdr">
@@ -1191,6 +1330,19 @@ const SITE_TYPE_OVERRIDES_LC = Object.fromEntries(
   Object.entries(SITE_TYPE_OVERRIDES).map(([code, types]) => [code.toLowerCase(), new Set(types.map(t => t.toLowerCase()))])
 );
 
+// Shared text-normalisation helper — case-insensitive, collapses whitespace,
+// and normalises dash variants (en/em dash vs hyphen) so that harmless
+// punctuation differences between a site's imported config and its actual
+// logged data never cause an otherwise-identical category to be treated as
+// unrecognised.
+function normCatText(s) {
+  return (s || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[‐-―−]/g, '-')
+    .replace(/\s+/g, ' ');
+}
+
 // Cache of each site's imported "OTHER"-section type names (lowercased),
 // built lazily per site code — matches the same fix applied to Manager.html.
 const _siteOtherTypesCache = {};
@@ -1205,11 +1357,38 @@ function getSiteOtherTypes(siteCode) {
       const parsed = JSON.parse(raw);
       const otherKey = Object.keys(parsed || {}).find(k => k.trim().toUpperCase() === 'OTHER');
       if (otherKey && Array.isArray(parsed[otherKey])) {
-        result = new Set(parsed[otherKey].map(t => (t||'').toLowerCase()));
+        result = new Set(parsed[otherKey].map(t => normCatText(t)));
       }
     }
   } catch(e) { /* leave as null, falls through to normal exclusion rules */ }
   _siteOtherTypesCache[key] = result;
+  return result;
+}
+
+// A site's own imported NON-Other categories (e.g. Burnside's High/Medium/Low
+// Priority lists) — these are genuine, counted incident types by definition,
+// so a type that exactly matches one of them must never be silently dropped
+// by the generic OPERATIONAL_KEYWORDS substring guess below (e.g. Burnside's
+// real "Theft – customer / staff / contractor / mall" category was being
+// excluded from every report because its text happens to contain the
+// substring "contractor").
+const _siteRealCatsCache = {};
+function getSiteRealCatTypes(siteCode) {
+  if (!siteCode) return null;
+  const key = siteCode.toUpperCase();
+  if (key in _siteRealCatsCache) return _siteRealCatsCache[key];
+  let result = null;
+  try {
+    const raw = localStorage.getItem('ams_entry_cats_' + key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const types = Object.entries(parsed || {})
+        .filter(([sec]) => sec.trim().toUpperCase() !== 'OTHER')
+        .flatMap(([, arr]) => Array.isArray(arr) ? arr : []);
+      if (types.length) result = new Set(types.map(t => normCatText(t)));
+    }
+  } catch(e) { /* leave as null, falls through to normal exclusion rules */ }
+  _siteRealCatsCache[key] = result;
   return result;
 }
 
@@ -1218,6 +1397,7 @@ function isExcluded(type, siteCode) {
   const t = type.trim();
   if (!t) return true;
   const tl = t.toLowerCase();
+  const tn = normCatText(t);
   // Site-specific override takes priority — if this site counts this type
   // as a real incident, it's never excluded for that site, full stop.
   if (siteCode && SITE_TYPE_OVERRIDES_LC[siteCode.toLowerCase()]?.has(tl)) return false;
@@ -1225,15 +1405,202 @@ function isExcluded(type, siteCode) {
   // this site's config puts this type under Other, it's excluded for this
   // site regardless of the shared blacklist below.
   const siteOther = getSiteOtherTypes(siteCode);
-  if (siteOther && siteOther.has(tl)) return true;
+  if (siteOther && siteOther.has(tn)) return true;
+  // A site's own imported REAL (non-Other) categories are never excluded —
+  // exact membership in the site's own declared incident list is
+  // authoritative over the generic blacklist/keyword heuristics below,
+  // which exist only to catch naming variants for sites with no config of
+  // their own.
+  const siteRealCats = getSiteRealCatTypes(siteCode);
+  if (siteRealCats && siteRealCats.has(tn)) return false;
   // Blacklist: exclude known operational/admin entries (case-insensitive).
   if (EXCLUDED_TYPES_LC.has(tl)) return true;
+  // Auto-logged register entries (Isolation/Equipment/Key/Permit/Lost
+  // Property/AAS/Workplace Injury/Test Entry) — same list used by the
+  // "total record count" tallies elsewhere. These were falling through to
+  // "counted" here because neither EXCLUDED_TYPES_LC nor OPERATIONAL_KEYWORDS
+  // actually covered them (e.g. "isolation logged" doesn't match the
+  // "fire isolation" keyword), so they were inflating monthly stats.
+  if (REGISTER_LINKED_TYPES_LC.has(tl)) return true;
   // Keyword fallback for naming variants not covered above.
   if (OPERATIONAL_KEYWORDS.some(k => tl.includes(k))) return true;
   // Everything else is treated as a security incident so no legitimate
   // incident type is ever silently dropped due to a missing whitelist entry.
   return false;
 }
+
+// ── Report category matching ─────────────────────────────────────────────────
+// Reports (monthly, YTD, PDF, batch, overview counts) must only show the
+// categories declared in each site's own imported config. Logged entries
+// whose type is worded slightly differently from a config category (older
+// names, plurals, dash/punctuation differences, "&" vs "and", typos) are
+// folded into the closest config category; anything that can't be matched
+// to a config category is left out of the reports. The incident log itself
+// still shows the raw entries untouched.
+const _siteCatMatchCache = {};   // { CODE: { cats:[...], memo:{ rawNorm: canonical|null } } }
+
+const _CAT_STOPWORDS = new Set(['a','an','the','of','from','to','by','in','on','and','or','with','at','for']);
+const _CAT_GENERIC = new Set(['incident','activity','person','people','issue','report','event','other','related','general','minor','customer','staff']);
+function _catWords(s) {
+  return normCatText(s)
+    .replace(/&/g, ' and ')
+    .replace(/[-\/\\|,.:;()'"!?+]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(Boolean)
+    .map(w => (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) ? w.slice(0, -1) : w);
+}
+function _catKey(s)     { return _catWords(s).join(' '); }
+function _catCompact(s) { return _catWords(s).join(''); }
+function _catTokens(s)  { return _catWords(s).filter(w => !_CAT_STOPWORDS.has(w)); }
+
+function _levRatio(a, b) {
+  if (a === b) return 1;
+  if (!a.length || !b.length) return 0;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return 1 - prev[b.length] / Math.max(a.length, b.length);
+}
+
+// Known renames between older logged wording and current config wording.
+// Only used when the target actually exists in the site's config.
+const CAT_ALIASES = [
+  ['Carpark Incident',          ['Minor Car Park Incident', 'Car Park Incident']],
+  ['Disruptive Behaviour',      ['Anti-Social Behaviour', 'Antisocial Behaviour']],
+  ['Fire Alarms',               ['Fire Alarm Activation — Confirmed', 'Fire Alarm Activation']],
+  ['Lift Entrapment / Stopped', ['Lift Entrapment / Stopped Lift']],
+  ['Lost Child / Person',       ['Lost Child / Vulnerable Person']],
+  ['Medical Condition',         ['Medical / First Aid — Non Life Threatening', 'Medical / First Aid']],
+  ['Power Interruption',        ['Critical Infrastructure Failure / Power Interruption']],
+  ['Property Damage, Vandalism',['Property Damage / Vandalism']],
+  ['Suspect Persons',           ['Suspicious Person / Activity', 'Suspect Person / Activity']],
+  ['Tenants Alarm',             ['Tenancy Alarm']],
+  ['Weather Event',             ['Weather Related Incident']],
+  ['Sign In Key/Fob',           ['Sign In Keys / Fob']],
+  ['Sign Out Key/Fob',          ['Sign Out Keys / Fob']],
+  ['Shoplifting',               ['Theft from Retailer']],
+  ['Stolen Property',           ['Theft — Customer / Staff / Contractor / Mall']],
+  ['Drug Influence / Sharps',   ['Drug Related Activity']],
+  ['Public Liability Incident', ['Slip / Trip / Fall — Customer']],
+  ['Tenant',                    ['Tenants']],
+  ['Customer',                  ['Other']],
+].map(([from, tos]) => [_catKey(from), tos.map(_catKey)]);
+
+function _getSiteCatMatcher(siteCode) {
+  if (!siteCode) return null;
+  const key = siteCode.toUpperCase();
+  if (key in _siteCatMatchCache) return _siteCatMatchCache[key];
+  let result = null;
+  try {
+    const raw = localStorage.getItem('ams_entry_cats_' + key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const cats = [];
+      const seen = new Set();
+      Object.values(parsed || {}).forEach(arr => {
+        (Array.isArray(arr) ? arr : []).forEach(c => {
+          const name = (c || '').toString().trim();
+          const k = _catKey(name);
+          if (name && !seen.has(k)) {
+            seen.add(k);
+            cats.push({ name, key: k, compact: _catCompact(name), tokens: _catTokens(name) });
+          }
+        });
+      });
+      if (cats.length) result = { cats, memo: {} };
+    }
+  } catch(e) { /* no config — reports fall back to the old behaviour */ }
+  _siteCatMatchCache[key] = result;
+  return result;
+}
+
+// Returns the site's config category name that best matches `type`, or null
+// if nothing in the config is close enough. Returns undefined if the site
+// has no imported config at all (caller should leave the record alone).
+function mapTypeToSiteCat(type, siteCode) {
+  const m = _getSiteCatMatcher(siteCode);
+  if (!m) return undefined;
+  const raw = (type || '').toString().trim();
+  if (!raw) return null;
+  const tKey = _catKey(raw);
+  if (tKey in m.memo) return m.memo[tKey];
+
+  const tCompact = _catCompact(raw);
+  const tTokens  = _catTokens(raw);
+  const aliasTargets = (CAT_ALIASES.find(([from]) => from === tKey) || [null, []])[1];
+
+  let best = null, bestScore = 0;
+  for (const c of m.cats) {
+    let score = 0;
+    if (c.key === tKey || c.compact === tCompact) score = 1;
+    else if (aliasTargets.includes(c.key)) score = 0.99;
+    else {
+      const lev = _levRatio(tCompact, c.compact);
+      if (lev >= 0.8) score = Math.max(score, lev * 0.95);
+      if (tTokens.length && c.tokens.length) {
+        const setT = new Set(tTokens), setC = new Set(c.tokens);
+        const shared = [...setT].filter(w => setC.has(w));
+        const inter = shared.length;
+        // Sharing only a generic word ("incident", "person"…) isn't a match.
+        if (shared.every(w => _CAT_GENERIC.has(w))) { /* no token credit */ }
+        else {
+        const dice  = (2 * inter) / (setT.size + setC.size);
+        const subset = inter === Math.min(setT.size, setC.size);
+        if (subset && inter > 0) score = Math.max(score, 0.7 + 0.2 * dice);
+        else if (dice >= 0.6)    score = Math.max(score, dice * 0.9);
+        }
+      }
+      if (Math.min(tCompact.length, c.compact.length) >= 5 &&
+          !tTokens.every(w => _CAT_GENERIC.has(w)) && !c.tokens.every(w => _CAT_GENERIC.has(w)) &&
+          (c.compact.includes(tCompact) || tCompact.includes(c.compact))) {
+        score = Math.max(score, 0.75);
+      }
+    }
+    if (score > bestScore) { bestScore = score; best = c.name; }
+  }
+  const out = bestScore >= 0.6 ? best : null;
+  m.memo[tKey] = out;
+  return out;
+}
+
+// Rewrites a site's records for reporting: each type/secondary is replaced
+// by its matching config category name, and records whose type matches no
+// config category are dropped. Sites without an imported config are
+// returned unchanged. Never mutates the original records.
+function canonicaliseForReports(data, siteCode) {
+  if (!Array.isArray(data) || !data.length) return data || [];
+  const out = [];
+  for (const r of data) {
+    const code = siteCode || r.siteCode;
+    const t = mapTypeToSiteCat(r.type, code);
+    if (t === undefined) { out.push(r); continue; }   // no config for this site
+    if (!t) continue;                                   // not a config category
+    let sec = r.secondary;
+    if (sec) {
+      const s2 = mapTypeToSiteCat(sec, code);
+      sec = s2 || '';
+    }
+    out.push(Object.assign({}, r, { type: t, secondary: sec, siteCode: siteCode || r.siteCode || code, _origType: r.type, _origSecondary: r.secondary || '' }));
+  }
+  return out;
+}
+
+// Records for a site's reports: config categories only, operational/Other
+// entries removed.
+function getReportData(site) {
+  if (!site) return [];
+  const code = (site.code || '').toUpperCase();
+  return canonicaliseForReports(site.data || [], code)
+    .filter(r => !isExcluded(r.type, code || r.siteCode));
+}
+
 const MONTHS_NAMES  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CHART_COLORS  = ['#3b82f6','#f59e0b','#ef4444','#10b981','#8b5cf6','#f97316','#06b6d4','#94a3b8','#ec4899','#84cc16','#14b8a6','#f43f5e'];
 
@@ -1247,6 +1614,13 @@ const REGISTER_LINKED_TYPES_LC = new Set([
   'test entry',
 ].map(t => t.toLowerCase()));
 
+// NOTE: previously had several categories listed twice within the same
+// section (e.g. "Disturbances (Assaults)", "Drug / Alcohol Related",
+// "Offenders Detained", "Vehicle Theft", "Damage to Water Pipes") — harmless
+// for isExcluded() matching, but caused visible duplicate rows anywhere this
+// list is rendered directly, e.g. Historical Data Entry for a site with no
+// imported config of its own. De-duplicated below, order otherwise preserved
+// — matches the same fix applied to Manager.html.
 const DEFAULT_CATS = {
   'GENERAL SECURITY': [
     'Attempted Theft','Banned Offender','Disturbances (Assaults)','Drug / Alcohol Related',
@@ -1258,12 +1632,11 @@ const DEFAULT_CATS = {
     'Anti-Social Behaviour','Assault','Assault on Security Officers',
     'General Theft','General Security Incidents','General Security',
     'Intoxication/Alcohol','Intoxication','Shop Disturbance',
-    'Disturbances (Assaults)','Drug / Alcohol Related','Offenders Detained',
     'Burglary','Break & Enter from a Retailer','Break & Enter from a Vehicle',
     'Drug Use/Needles Found','Drug Influence / Sharps','Malicious Damage',
     'Malicious Damage /Graffiti','Non-Malicious Damage','Property Damage',
     'Centre Property Damage','Graffiti',
-    'Motor Vehicle Accident & Damage','Vehicle Incident','Vehicle Theft',
+    'Motor Vehicle Accident & Damage','Vehicle Incident',
     'Theft from a Vehicle & Break-in/Damage',
     'Lost Child/Person','Maintenance','Other',
   ],
@@ -1272,7 +1645,7 @@ const DEFAULT_CATS = {
     'Damage to Water Pipes','Fire/Fire Alarms','Fire / Fire Alarms',
     'Gas Leaks','Person/s Trapped in Lift','Power Outage','Structural Collapses',
     'First Aid & Related','First Aids & Related','First Aids & Related Incidents',
-    'Damage to Water Pipes','Power Interruption','Damage to Fire Sprinkler System',
+    'Power Interruption','Damage to Fire Sprinkler System',
   ],
   'GUARD INTERVENTION': [
     'Prevented By Guard (Disturbance & Theft)','Prevented by Guard (Disturbance & Theft)',
@@ -1289,15 +1662,85 @@ const DEFAULT_CATS = {
   ]
 };
 
-// Burnside-specific category structure
+// Burnside-specific category structure — kept in sync with site_config_burnsideNEW.json
+// (65 categories: 51 incident types across High/Medium/Low Priority + 14 OTHER).
+// This is only used as a fallback when no config has been imported for Burnside
+// on a given machine — once "Import Site Config" is run, the site's own imported
+// categories (ams_entry_cats_BURNSIDE in localStorage) take priority over this.
 const BURNSIDE_CATS = {
-  'HIGH PRIORITY':   ['Assault','Gang Activity','Sexual Offences','Robbery','Shop Break-ins','Major Drug Activities / OD','Deceased Person'],
-  'MEDIUM PRIORITY': ['Drug Influence / Sharps','Shoplifting','Stolen Property','Property Damage','Vandalism','Suspect Persons','Disruptive Behaviour'],
-  'LOW PRIORITY':    ['Fire Alarms','Power Interruption','Tenants Alarm','Unsecured Tenancy','Lost Child / Person','Lift Entrapment / Stopped','Public Liability Incident','Weather Event','Carpark Incident','Medical Condition'],
-  'OTHER':           ['Sign On','Sign Off','CCTV','Contractor','Customer','Delivery','Fire Isolations','Hoarding','Lock-up','Other','Patrol','Permit','SAPOL','Sign In Key/Fob','Sign Out Key/Fob','Tenant','Unlock',
-    'Isolation Logged','Isolation Restored','Equipment Isolated','Equipment Restored',
-    'Key Issued','Key Returned','Permit Issued','Permit Closed',
-    'Lost Property Found','Lost Property Moved','Acts Against Security','Workplace Injury','Test Entry'],
+  'HIGH PRIORITY': [
+    'Active Armed Offender / Lockdown',
+    'Armed Robbery',
+    'Bomb Threat / Suspicious Package',
+    'Break-in or Attempted Break-in Centre',
+    'Break-in or Attempted Break-in Tenancy',
+    'Hazardous Material / Gas Leak',
+    'Life Threatening Medical Emergency',
+    'Major Fire',
+    'Serious Life Threatening Injury / Deceased Person',
+    'Structural Damage',
+    'Weapon Involved / Credible Weapon Threat',
+  ],
+  'MEDIUM PRIORITY': [
+    'Aggressive / Threatening Behaviour',
+    'Anti-Social Behaviour',
+    'Assault',
+    'Attempted Theft / Guard Prevented Theft',
+    'Critical Infrastructure Failure / Power Interruption',
+    'Domestic and Family Violence Incident',
+    'Drug Related Activity',
+    'Fire Alarm Activation - Confirmed',
+    'Intoxicated / Impaired Person',
+    'Lift Entrapment / Stopped Lift',
+    'Lost Child / Vulnerable Person',
+    'Medical / Mental Health / Welfare Incident',
+    'Property Damage / Vandalism',
+    'Security System Failure - CCTV / Access Control',
+    'Suspicious Person / Activity',
+    'Theft - Customer / Staff / Contractor / Mall',
+    'Theft from Motor Vehicle',
+    'Theft from Retailer',
+    'Traffic Management Issue',
+    'Trespass / Refusal to Leave',
+    'Vehicle Collision - Vehicle vs Building',
+    'Vehicle Collision - Vehicle vs Pedestrian',
+    'Vehicle Collision - Vehicle vs Vehicle',
+  ],
+  'LOW PRIORITY': [
+    'Banned Offender on Site',
+    'Contractor Operational Incident',
+    'False Alarm / System Fault / False Activation',
+    'Graffiti',
+    'Lift / Escalator / Travelator / Automatic Door Incident',
+    'Lost / Found Property',
+    'Medical / First Aid - Non Life Threatening',
+    'Minor Car Park Incident',
+    'Near Miss / Hazard - Public Area',
+    'Near Miss / Hazard - Retailer / Contractor',
+    'Noise Complaint',
+    'Sharps / Needles',
+    'Slip / Trip / Fall - Customer',
+    'Tenancy Alarm',
+    'Unsecured Tenancy',
+    'Water Leak / Flooding',
+    'Weather Related Incident',
+  ],
+  'OTHER': [
+    'CCTV',
+    'Centre Management Duties',
+    'Contractor',
+    'Delivery',
+    'Fire Isolations',
+    'Lock-up',
+    'Other',
+    'Patrol',
+    'Permit',
+    'SAPOL Attendance / Police Intervention',
+    'Sign In Keys / Fob',
+    'Sign Out Keys / Fob',
+    'Tenants',
+    'Unlock',
+  ],
 };
 
 // Detect if this is a Burnside site by checking if types match Burnside categories
@@ -1318,18 +1761,32 @@ function isBurnsideSite(data) {
 }
 
 // ── Derive categories from a site's actual data ───────────────────────────────
-function getCatsForSite(data, siteName) {
+function getCatsForSite(data, siteName, siteCodeArg) {
   // Get all unique incident types in the data (excluding operational entries)
+  const _codeForExcl = (siteCodeArg || '').toUpperCase();
   const typesInData = [...new Set(
     data
-      .filter(r => !isExcluded(r.type, r.siteCode))
+      .filter(r => !isExcluded(r.type, _codeForExcl || r.siteCode))
       .map(r => r.type.trim())
   )].sort((a,b) => a.localeCompare(b));
 
   // A site's own imported categories (from its site_config_*.json, via
   // Import Site Config) take priority over the shared default list —
   // matches the same fix applied to Manager.html.
-  const siteCode = (data.length ? (data[0].siteCode || '') : '').toUpperCase();
+  // Site code: the caller's (the site's own code) is authoritative; else
+  // look the site up by name; else the most common code in the records
+  // (not just the first record's — one stray record used to send a whole
+  // site to the generic default categories).
+  let siteCode = (siteCodeArg || '').toUpperCase();
+  if (!siteCode && siteName) {
+    const s = (typeof sites !== 'undefined' ? sites : []).find(x => (x.name||'') === siteName);
+    if (s && s.code) siteCode = s.code.toUpperCase();
+  }
+  if (!siteCode && data.length) {
+    const tally = {};
+    data.forEach(r => { const c = (r.siteCode||'').toUpperCase(); if (c) tally[c] = (tally[c]||0) + 1; });
+    siteCode = Object.keys(tally).sort((a,b) => tally[b]-tally[a])[0] || '';
+  }
   let importedCats = null;
   if (siteCode) {
     try {
@@ -1341,7 +1798,10 @@ function getCatsForSite(data, siteName) {
     } catch(e) { /* fall through to defaults below */ }
   }
 
-  if (!typesInData.length) return { sections: importedCats || DEFAULT_CATS, allTypes: [], burnside: false };
+  if (!typesInData.length) {
+    const secs = importedCats || DEFAULT_CATS;
+    return { sections: secs, allTypes: [], burnside: false, sectionOrder: Object.keys(secs) };
+  }
 
   // ── Detect Burnside — check site name first, then data ───────────────────
   const nameToCheck = siteName || (data.length ? (data[0].site || '') : '');
@@ -1364,13 +1824,21 @@ function getCatsForSite(data, siteName) {
   const MEDIUM_KEYWORDS = ['shoplifting','stolen','damage','vandal','suspect','disruptive','drug influence','sharp'];
   const LOW_KEYWORDS    = ['alarm','power','tenant','unsecured','lost child','lift','liability','weather','carpark','medical'];
 
+  // Uses the shared normCatText() (defined above, near isExcluded) so that
+  // harmless punctuation differences (en dash "–" vs hyphen "-", double
+  // spaces, stray whitespace) between a site's imported config and the
+  // actual logged data never cause an otherwise-identical category to be
+  // missed by the exact-match pass below and get dumped into the fallback
+  // bucket instead.
+  const normCat = normCatText;
+
   const sections = {};
   const assigned = new Set();
 
-  // Pass 1: exact case-insensitive match against BASE_CATS
+  // Pass 1: exact match (case- and punctuation-normalised) against BASE_CATS
   Object.entries(BASE_CATS).forEach(([section, knownTypes]) => {
     const matched = typesInData.filter(t =>
-      knownTypes.some(k => k.toLowerCase() === t.toLowerCase())
+      knownTypes.some(k => normCat(k) === normCat(t))
     );
     if (matched.length) {
       sections[section] = matched.sort((a,b) => a.localeCompare(b));
@@ -1429,7 +1897,35 @@ function getCatsForSite(data, siteName) {
     return true;
   });
 
-  return { sections: ordered, allTypes, burnside };
+  // sectionOrder is the site's FULL declared tier order (e.g. ['HIGH
+  // PRIORITY','MEDIUM PRIORITY','LOW PRIORITY','OTHER']) regardless of
+  // whether a given tier currently has any matching records. Consumers that
+  // need to address "the 1st/2nd/3rd severity tier" specifically (report
+  // titles, KPI cards) must use THIS — not Object.keys(ordered) — because
+  // `ordered` silently drops empty tiers, which would otherwise shift a
+  // lower tier into a higher tier's slot and mislabel it.
+  return { sections: ordered, allTypes, burnside, sectionOrder: SECTION_ORDER };
+}
+
+// Canonical display titles for a category tier, keyed by the tier's exact
+// declared name (case-insensitive). Falls back to a generic Title Case
+// rendering for any custom section name not listed here, so a future site
+// with its own bespoke category structure still gets a sensible label
+// instead of silently inheriting another site's wording.
+const SECTION_TITLE_MAP = {
+  'HIGH PRIORITY':      { full: 'High Priority Incidents',           comp: 'High Priority' },
+  'MEDIUM PRIORITY':    { full: 'Medium Priority Incidents',         comp: 'Medium Priority' },
+  'LOW PRIORITY':       { full: 'Low Priority Incidents',            comp: 'Low Priority' },
+  'GENERAL SECURITY':   { full: 'Security Related Centre Incidents', comp: 'Security Related' },
+  'EMERGENCY RELATED':  { full: 'Emergency Related Incidents',       comp: 'Emergency Related' },
+  'GUARD INTERVENTION': { full: 'Guard Intervention',                comp: 'Guard Intervention' },
+};
+function sectionTitleInfo(name) {
+  const key = (name || '').trim().toUpperCase();
+  if (SECTION_TITLE_MAP[key]) return SECTION_TITLE_MAP[key];
+  if (!key) return { full: '', comp: '' };
+  const titled = key.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  return { full: titled + ' Incidents', comp: titled };
 }
 
 // ─ site-level fs handles are stored in IndexedDB keyed by site id
@@ -1594,6 +2090,7 @@ function showTab(name, el) {
   if(name==='aas')       { buildSiteChips(); renderAASPanel(); }
   if(name==='equipment') { buildSiteChips(); renderEquipPanel(); }
   if(name==='email')   { populateEmailSiteSelect(); populateEmailMonths(); }
+  if(name==='comms')   { initCommsPanel(); }
   if(name==='sites')   { renderSitesSettings(); }
 }
 
@@ -1682,6 +2179,13 @@ function renderOverview() {
   const statBar = document.getElementById('overview-stats-bar');
   grid.innerHTML = '';
   updatePoliciesLink();
+  updateCommsNavBadge();
+  updateOverviewTiles();
+  const status = document.getElementById('ov-sync-status');
+  if (status && sites.length) {
+    const now = new Date().toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'});
+    status.textContent = `${sites.length} site${sites.length!==1?'s':''} loaded · Last refreshed: ${now}`;
+  }
 
   if (!sites.length) {
     noSites.style.display='block'; if(statBar)statBar.style.display='none';
@@ -1879,8 +2383,15 @@ async function reloadAllSites() {
 // ═══════════════════════════════════════════════════════
 // MONTHLY REPORT
 // ═══════════════════════════════════════════════════════
+// Monthly reports only: records mapped onto the site's own config
+// categories (close wording folded in, anything else left out).
+function getMonthlyReportData() {
+  const s = getActiveSite();
+  return s ? getReportData(s) : [];
+}
+
 function initMonthly() {
-  const data   = getActiveData();
+  const data   = getMonthlyReportData();
   const months = getSortedMonths(data);
   const sel    = document.getElementById('monthly-month-sel');
   sel.innerHTML = '';
@@ -1890,31 +2401,35 @@ function initMonthly() {
 }
 
 function renderMonthly(idx) {
-  const data     = getActiveData();
+  const data     = getMonthlyReportData();
   const months   = getSortedMonths(data);
   if(!months.length) return;
   const monthStr = months[idx];
   const priorStr = priorYearMonth(monthStr);
   const site     = getActiveSite();
-  const { sections: catSections, burnside, allTypes: allCats } = getCatsForSite(data, site?.name||"");
+  const { sections: catSections, allTypes: allCats, sectionOrder } = getCatsForSite(data, site?.name||"", site?.code||"");
 
-  // Dynamic section keys and labels
-  const sectionKeys = Object.keys(catSections).filter(s => s !== 'OTHER');
-  const secKey   = sectionKeys[0] || '';
-  const medKey   = sectionKeys[1] || '';
-  const lowKey   = sectionKeys[2] || '';
+  // Dynamic section keys and labels — addressed by the site's FULL declared
+  // tier order (sectionOrder), not by position within catSections, which
+  // silently drops any tier with zero matching records this period and
+  // would otherwise shift a lower tier into a higher tier's label/slot.
+  const tierOrder = sectionOrder.filter(s => s !== 'OTHER');
+  const secKey   = tierOrder[0] || '';
+  const medKey   = tierOrder[1] || '';
+  const lowKey   = tierOrder[2] || '';
   const stdCats   = catSections[secKey]  || [];
   const emgCats   = catSections[medKey]  || [];
   const guardCats = catSections[lowKey]  || [];
 
-  const secLabel  = burnside ? 'High Priority'   : 'General Security';
-  const medLabel  = burnside ? 'Medium Priority'  : 'Emergency Related';
-  const lowLabel  = burnside ? 'Low Priority'     : 'Guard Intervention';
+  const secLabel  = sectionTitleInfo(secKey).comp;
+  const medLabel  = sectionTitleInfo(medKey).comp;
+  const lowLabel  = sectionTitleInfo(lowKey).comp;
 
   const currData = data.filter(r=>r.month===monthStr);
   const priorData= data.filter(r=>r.month===priorStr);
-  const countWS = arr => arr.filter(r => !REGISTER_LINKED_TYPES_LC.has((r.type||'').toLowerCase()))
-    .reduce((s,r) => s + 1, 0);
+  // Grand total = exactly the categories listed in the report.
+  const _allShownCats = Object.values(catSections).flat();
+  const countWS = arr => arr.filter(r => _allShownCats.includes(r.type)).length;
   const cT=countWS(currData), pT=countWS(priorData), diff=cT-pT;
 
   document.getElementById('monthly-title').textContent   = `Monthly Report — ${site?.name||''} · ${monthStr}`;
@@ -2171,11 +2686,18 @@ function renderHistoricalComparison() {
   const data = getActiveData();
   const site = getActiveSite();
 
-  if (!data.length) { section.style.display = 'none'; return; }
+  const tbl = document.getElementById('historical-table');
+  if (!data.length) {
+    if(tbl) tbl.innerHTML = '<tr><td style="padding:32px;text-align:center;color:var(--dk-text3);font-style:italic;">No data loaded — pull from cloud to populate comparison.</td></tr>';
+    return;
+  }
 
   const { sections: catSections } = getCatsForSite(data, site?.name || '');
   const sectionEntries = Object.entries(catSections).filter(([key]) => key !== 'OTHER');
-  if (!sectionEntries.length) { section.style.display = 'none'; return; }
+  if (!sectionEntries.length) {
+    if(tbl) tbl.innerHTML = '<tr><td style="padding:32px;text-align:center;color:var(--dk-text3);font-style:italic;">No incident categories found for this site.</td></tr>';
+    return;
+  }
 
   const FY_MONTHS   = ['July','August','September','October','November','December',
                         'January','February','March','April','May','June'];
@@ -2204,7 +2726,10 @@ function renderHistoricalComparison() {
   const allMonthsSorted = getSortedMonths(data);
   const fyStartYears = [...new Set(allMonthsSorted.map(fyStartForMonthLabel).filter(v => v !== null))]
     .sort((a, b) => a - b);
-  if (!fyStartYears.length) { section.style.display = 'none'; return; }
+  if (!fyStartYears.length) {
+    if(tbl) tbl.innerHTML = '<tr><td style="padding:32px;text-align:center;color:var(--dk-text3);font-style:italic;">No financial year data available yet.</td></tr>';
+    return;
+  }
   const totalFYs = fyStartYears.length;
   const latestFY = fyStartYears[fyStartYears.length - 1];
 
@@ -2587,7 +3112,7 @@ function renderHistoricalComparison() {
       (elapsedCount < 12 ? ` <span style="opacity:0.7;">(each year capped to Jul–${lastElapsedShort} — as far as ${fyLabel(latestFY)} has reached — for a fair comparison)</span>` : '');
   }
 
-  section.style.display = 'block';
+  // section always visible — no need to set display
 
   // ── Notable incidents — most recent month, highest-priority section ────────
   const latestMonth = allMonthsSorted[allMonthsSorted.length - 1];
@@ -2712,6 +3237,17 @@ function getWufooFormIdForRecord(site, record) {
 }
 
 async function openWufooReport(siteCode, entryId, formId) {
+  // Use the site's own scriptUrl — same Apps Script handles Wufoo lookups
+  if (!_wufooScriptUrl) {
+    const site = sites.find(s => s.code === siteCode);
+    if (site?.scriptUrl) {
+      _wufooScriptUrl = site.scriptUrl;
+    } else {
+      // Last resort — check if any site has a script URL
+      const anySite = sites.find(s => s.scriptUrl);
+      if (anySite) _wufooScriptUrl = anySite.scriptUrl;
+    }
+  }
   if (!_wufooScriptUrl) {
     const url = prompt('Enter your Google Apps Script URL (same one used for Drive sync):');
     if (!url) return;
@@ -3235,35 +3771,40 @@ function generateReport() {
   if(!monthStr){showToast('Select a month','error');return;}
   const site = sites.find(s=>s.id===sid);
   if(!site){showToast('Site not found','error');return;}
-  const allData = (site.data||[]).filter(r=>!isExcluded(r.type, r.siteCode));
+  const allData = getReportData(site);
   buildPDFReport(site, allData, monthStr, guards);
 }
 
 function buildPDFReport(site, allData, monthStr, guardsStr) {
-  const { sections: catSections, allTypes: allCatsPDF, burnside } = getCatsForSite(allData, site?.name||"");
+  const { sections: catSections, allTypes: allCatsPDF, sectionOrder } = getCatsForSite(allData, site?.name||"", site?.code||"");
 
-  // Get section keys in order (exclude OTHER)
-  const sectionKeys = Object.keys(catSections).filter(s => s !== 'OTHER');
+  // Tier keys addressed by the site's FULL declared order (sectionOrder),
+  // not by position within catSections — catSections silently drops any
+  // tier with zero matching records this period, which would otherwise
+  // shift a lower tier into a higher tier's title/slot.
+  const tierOrder = sectionOrder.filter(s => s !== 'OTHER');
 
-  // Primary section = first (Security Related / High Priority)
-  // Secondary section = second (Emergency Related / Medium Priority)
-  // Tertiary section = third (Guard Intervention / Low Priority)
-  const secKey   = sectionKeys[0] || 'GENERAL SECURITY';
-  const medKey   = sectionKeys[1] || '';
-  const lowKey   = sectionKeys[2] || '';
-  const otherKey = sectionKeys[3] || '';
+  // Primary section = first declared tier (Security Related / High Priority)
+  // Secondary section = second declared tier (Emergency Related / Medium Priority)
+  // Tertiary section = third declared tier (Guard Intervention / Low Priority)
+  const secKey   = tierOrder[0] || 'GENERAL SECURITY';
+  const medKey   = tierOrder[1] || '';
+  const lowKey   = tierOrder[2] || '';
+  const otherKey = sectionOrder.find(s => s === 'OTHER') || '';
 
   const stdCats   = catSections[secKey]   || [];
   const emgCats   = catSections[medKey]   || [];
   const guardCats = catSections[lowKey]   || [];
   const otherCats = catSections[otherKey] || [];
 
-  // Human-readable titles for the report
-  const secTitle   = burnside ? 'High Priority Incidents'    : 'Security Related Centre Incidents';
-  const medTitle   = burnside ? 'Medium Priority Incidents'  : 'Emergency Related Incidents';
-  const lowTitle   = burnside ? 'Low Priority Incidents'     : 'Guard Intervention';
-  const compTitle1 = burnside ? 'High Priority'              : 'Security Related';
-  const compTitle2 = burnside ? 'Medium / Low Priority'      : 'Emergency Related';
+  // Human-readable titles for the report — derived from the tier's actual
+  // declared name, so any config's own section names are honoured rather
+  // than assuming every site is either "Burnside-style" or "legacy-style".
+  const secTitle   = sectionTitleInfo(secKey).full;
+  const medTitle   = sectionTitleInfo(medKey).full;
+  const lowTitle   = sectionTitleInfo(lowKey).full;
+  const compTitle1 = sectionTitleInfo(secKey).comp;
+  const compTitle2 = sectionTitleInfo(medKey).comp;
   const priorStr = priorYearMonth(monthStr);
   const cntByCatPDF = (arr,cat) => arr.filter(r=>r.type===cat).length;
   const cntCatsPDF  = (arr,cats) => arr.filter(r => cats.includes(r.type)).length;
@@ -3604,8 +4145,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#e8eef5;color:#1a1a
   <!-- KPI summary -->
   <div class="kpi-row">
     <div class="kpi-box"><div class="kpi-num">${cT}</div><div class="kpi-lbl">Total Incidents<br>${monthStr}</div></div>
-    <div class="kpi-box alt"><div class="kpi-num">${hTotal}</div><div class="kpi-lbl">${burnside?'High Priority':'Security Related'}<br>Incidents</div></div>
-    <div class="kpi-box alt"><div class="kpi-num">${mTotal}</div><div class="kpi-lbl">${burnside?'Medium Priority':'Emergency Related'}<br>Incidents</div></div>
+    <div class="kpi-box alt"><div class="kpi-num">${hTotal}</div><div class="kpi-lbl">${compTitle1}<br>Incidents</div></div>
+    <div class="kpi-box alt"><div class="kpi-num">${mTotal}</div><div class="kpi-lbl">${compTitle2}<br>Incidents</div></div>
     <div class="kpi-box ${diff===0?'':diff>0?'alt':'alt2'}"><div class="kpi-num">${diff>0?'+':''}${diff}</div><div class="kpi-lbl">vs ${priorStr}<br>(${pT} incidents)</div></div>
   </div>
 </div>
@@ -4028,7 +4569,7 @@ function exportManagerSettings() {
     policyHubUrl: localStorage.getItem('ams_policy_hub_url') || '',
     wufooViewerUrl: localStorage.getItem('ams_wufoo_viewer_url') || '',
     knownSiteCodes: JSON.parse(localStorage.getItem('ams_known_site_codes') || '[]'),
-    theme: localStorage.getItem('ams_theme') || 'dark',
+    theme: localStorage.getItem('ams_theme') || 'light',
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -4110,6 +4651,8 @@ function importSiteConfigFile(file) {
         try {
           localStorage.setItem('ams_entry_cats_' + code, JSON.stringify(cfg.categories));
           delete _siteOtherTypesCache[code];
+          delete _siteRealCatsCache[code];
+          delete _siteCatMatchCache[code];
         }
         catch(e) { showToast('Categories could not save — device storage may be full', 'error'); }
       }
@@ -4146,6 +4689,278 @@ function importSiteConfigFile(file) {
   reader.readAsText(file);
 }
 
+// ══ COMMS LOG — READ-ONLY VIEW + MANAGER POSTING ═════════════════════════════
+async function initCommsPanel() {
+  // Populate both site dropdowns
+  const filterSel = document.getElementById('comms-site-filter');
+  const mgrSel    = document.getElementById('mgr-comms-site');
+  const current   = filterSel.value;
+  const options   = sites.map(s => `<option value="${s.id}"${s.id===current?' selected':''}>${s.name}</option>`).join('');
+  filterSel.innerHTML = '<option value="__all__">All Sites</option>' + options;
+  if (mgrSel) mgrSel.innerHTML = '<option value="">— Select site —</option>' + options;
+
+  // Show loading state while fetching fresh data
+  const list = document.getElementById('comms-panel-list');
+  if (list) list.innerHTML = '<div style="text-align:center;color:var(--dk-text3);padding:40px 0;font-size:14px;">⏳ Loading latest messages from cloud…</div>';
+
+  // Pull fresh data from cloud before rendering
+  try { await reloadAllSites(); } catch(e) { console.warn('Comms refresh failed:', e); }
+
+  renderCommsPanel();
+  updateCommsNavBadge();
+}
+
+async function postManagerComms() {
+  const siteId   = document.getElementById('mgr-comms-site').value;
+  const author   = document.getElementById('mgr-comms-author').value.trim();
+  const priority = document.getElementById('mgr-comms-priority').value;
+  const message  = document.getElementById('mgr-comms-message').value.trim();
+
+  if (!siteId)  { showToast('Select a site', 'error'); return; }
+  if (!author)  { showToast('Enter your name', 'error'); return; }
+  if (!message) { showToast('Enter a message', 'error'); return; }
+
+  const site = sites.find(s => s.id === siteId);
+  if (!site || !site.scriptUrl) { showToast('No Apps Script URL configured for this site', 'error'); return; }
+
+  const now = new Date();
+  const newMsg = {
+    id:               'comms_mgr_' + Date.now(),
+    date:             now.toLocaleDateString('en-AU'),
+    time:             now.toTimeString().slice(0,5),
+    author:           author + ' (Management)',
+    priority,
+    message,
+    acknowledgements: [],
+    createdAt:        now.toISOString(),
+    updatedAt:        now.toISOString(),
+    fromManager:      true,
+  };
+
+  // Add to local site data immediately so it shows in the panel
+  if (!site.commsLog) site.commsLog = [];
+  site.commsLog.unshift(newMsg);
+
+  const btn = document.querySelector('[onclick="postManagerComms()"]');
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Sending…'; }
+    showToast('Sending message…', 'info');
+
+    const form = new URLSearchParams();
+    form.append('payload', JSON.stringify({
+      siteCode: site.code,
+      commsLog: [newMsg],
+      deletedIds: [],
+    }));
+
+    const resp   = await fetch(site.scriptUrl, { method: 'POST', body: form });
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Script error');
+
+    showToast('✓ Message sent to ' + site.name, 'success');
+    document.getElementById('mgr-comms-message').value = '';
+    renderCommsPanel();
+    updateCommsNavBadge();
+  } catch(e) {
+    // Try no-cors fallback
+    try {
+      await fetch(site.scriptUrl, {
+        method:  'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify({
+          siteCode: site.code,
+          commsLog: [newMsg],
+          deletedIds: [],
+        }),
+        mode: 'no-cors',
+      });
+      showToast('✓ Message sent (unconfirmed) to ' + site.name, 'success');
+      document.getElementById('mgr-comms-message').value = '';
+      renderCommsPanel();
+      updateCommsNavBadge();
+    } catch(e2) {
+      site.commsLog = site.commsLog.filter(m => m.id !== newMsg.id);
+      showToast('Send failed: ' + e2.message, 'error');
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📤 Post Message to Guards'; }
+  }
+}
+
+function renderCommsPanel() {
+  const list        = document.getElementById('comms-panel-list');
+  const siteFilter  = document.getElementById('comms-site-filter').value;
+  const priFilter   = document.getElementById('comms-priority-filter').value;
+  const unreadOnly  = document.getElementById('comms-unread-only').checked;
+
+  // Only show messages sent by management OR flagged for manager attention by guards
+  const sitesToShow = siteFilter === '__all__' ? sites : sites.filter(s => s.id === siteFilter);
+  let allMsgs = [];
+  sitesToShow.forEach(s => {
+    (s.commsLog || [])
+      .filter(m => m.fromManager || m.forManager)
+      .forEach(m => allMsgs.push({ ...m, _siteName: s.name, _siteCode: s.code }));
+  });
+
+  // Filter
+  if (priFilter)   allMsgs = allMsgs.filter(m => m.priority === priFilter);
+  if (unreadOnly)  allMsgs = allMsgs.filter(m => (m.acknowledgements||[]).length === 0);
+
+  // Sort — unread first, then by date/time desc
+  allMsgs.sort((a,b) => {
+    const aUnread = (a.acknowledgements||[]).length === 0;
+    const bUnread = (b.acknowledgements||[]).length === 0;
+    if (aUnread !== bUnread) return aUnread ? -1 : 1;
+    return (b.createdAt||'').localeCompare(a.createdAt||'');
+  });
+
+  const sub = document.getElementById('comms-panel-sub');
+  if (sub) sub.textContent = `${allMsgs.length} message${allMsgs.length!==1?'s':''} sent · ${allMsgs.filter(m=>(m.acknowledgements||[]).length===0).length} not yet acknowledged`;
+
+  if (!allMsgs.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--dk-text3);padding:50px 0;font-size:15px;">No messages found</div>';
+    return;
+  }
+
+  const PRIORITY_COL = { 'Routine':'#86efac','Urgent':'#fcd34d','Action Required':'#fca5a5' };
+  const PRIORITY_BG  = { 'Routine':'rgba(34,197,94,0.08)','Urgent':'rgba(245,158,11,0.08)','Action Required':'rgba(239,68,68,0.08)' };
+  const PRIORITY_ICN = { 'Routine':'🟢','Urgent':'🟡','Action Required':'🔴' };
+
+  list.innerHTML = allMsgs.map(m => {
+    const col      = PRIORITY_COL[m.priority] || '#86efac';
+    const icn      = PRIORITY_ICN[m.priority] || '🟢';
+    const acks     = m.acknowledgements || [];
+    const isUnread = acks.length === 0;
+    const bg       = isUnread ? (PRIORITY_BG[m.priority]||'rgba(239,68,68,0.08)') : 'var(--dk-bg2)';
+    const border   = isUnread ? col : '#1e3040';
+
+    const unreadBadge = isUnread
+      ? `<span style="background:${PRIORITY_BG[m.priority]||'rgba(239,68,68,0.15)'};color:${col};border:1px solid ${col};font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;animation:commsPulse 0.8s infinite;letter-spacing:0.5px;">${icn} ${m.priority} — UNREAD</span>`
+      : `<span style="font-size:11px;color:${col};font-weight:700;">${icn} ${m.priority}</span>`;
+
+    const ackHtml = acks.length
+      ? `<div style="font-size:12px;color:var(--dk-text3);margin-top:8px;">✅ Acknowledged by: ${acks.map(a=>`<strong style="color:${col}">${a.initials}</strong>${a.response ? ` <span style="color:var(--dk-text2);font-style:italic;">"${a.response}"</span>` : ''} <span style="color:var(--dk-text3)">(${a.time})</span>`).join(' · ')}</div>`
+      : `<div style="font-size:12px;color:#fca5a5;margin-top:8px;font-weight:700;">⚠ Not yet acknowledged by any guard</div>`;
+
+    const editedHtml = m.editedAt
+      ? `<div style="font-size:11px;color:var(--dk-text3);font-style:italic;margin-bottom:4px;">Edited ${new Date(m.editedAt).toLocaleString('en-AU')}</div>`
+      : '';
+
+    const siteTag = siteFilter === '__all__'
+      ? `<span style="background:rgba(201,151,58,0.15);color:var(--dk-gold);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px;">${m._siteName}</span>`
+      : '';
+    const mgrTag = m.fromManager
+      ? `<span style="background:rgba(99,102,241,0.2);color:#a5b4fc;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px;">📋 From Management</span>`
+      : m.forManager
+        ? `<span style="background:rgba(99,102,241,0.15);color:#a5b4fc;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;border:1px solid rgba(99,102,241,0.3);margin-left:6px;">📋 Guard → Manager</span>`
+        : '';
+
+    return `<div style="background:${bg};border:1px solid ${border};border-left:3px solid ${col};border-radius:8px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          ${unreadBadge}
+          ${siteTag}
+          ${mgrTag}
+        </div>
+        <div style="font-size:11px;color:var(--dk-text3);">${m.date||''} · ${m.time||''}</div>
+      </div>
+      <div style="font-size:14px;color:var(--dk-text);line-height:1.6;margin-bottom:6px;white-space:pre-wrap;">${m.message}</div>
+      ${editedHtml}
+      <div style="font-size:12px;color:var(--dk-text3);margin-bottom:10px;">— ${m.author}</div>
+      ${ackHtml}
+      <div style="margin-top:12px;">
+        <button onclick="openMgrCommsAck('${m.id}','${m._siteCode}')" style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.35);color:#86efac;padding:8px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">✅ Acknowledge &amp; Respond</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function refreshOverview() {
+  const btn  = document.getElementById('ov-refresh-btn');
+  const icon = document.getElementById('ov-refresh-icon');
+  const status = document.getElementById('ov-sync-status');
+  if (btn) { btn.disabled = true; icon.textContent = '⏳'; }
+  if (status) status.textContent = 'Refreshing all sites…';
+  try {
+    await reloadAllSites();
+    const now = new Date().toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'});
+    if (status) status.textContent = `Last refreshed: ${now}`;
+  } catch(e) {
+    if (status) status.textContent = '⚠ Refresh failed';
+  } finally {
+    if (btn) { btn.disabled = false; icon.textContent = '↺'; }
+  }
+}
+
+function updateOverviewTiles() {
+  // ── Single site mode — hide multi-site UI ─────────────────────────────────
+  const singleSite = sites.length === 1;
+  const multiSection = document.getElementById('multi-site-section');
+  if (multiSection) multiSection.style.display = singleSite ? 'none' : '';
+  // ── Incident counts ────────────────────────────────────────────────────────
+  const now       = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const cutoff12M = new Date(now);
+  cutoff12M.setFullYear(cutoff12M.getFullYear() - 1);
+
+  let countThisMonth = 0, count12M = 0;
+  sites.forEach(s => {
+    (s.data||[]).forEach(r => {
+      if (!r.date) return;
+      const d = new Date(r.date);
+      if (r.date.startsWith(thisMonth)) countThisMonth++;
+      if (d >= cutoff12M) count12M++;
+    });
+  });
+  const elMonth = document.getElementById('ov-stat-this-month');
+  const el12m   = document.getElementById('ov-stat-12m');
+  if (elMonth) elMonth.textContent = countThisMonth;
+  if (el12m)   el12m.textContent   = count12M;
+
+  // ── Comms badge ────────────────────────────────────────────────────────────
+  let unreadComms = 0;
+  sites.forEach(s => { (s.commsLog||[]).forEach(m => { if ((m.acknowledgements||[]).length===0) unreadComms++; }); });
+  const commsBadge = document.getElementById('ov-comms-badge');
+  if (commsBadge) commsBadge.style.display = unreadComms > 0 ? 'block' : 'none';
+
+  // ── Register counts ────────────────────────────────────────────────────────
+  const isoCount  = sites.reduce((n,s) => n + (s.isolationData||[]).filter(r=>r.status==='Isolated').length, 0);
+  const permCount = sites.reduce((n,s) => n + (s.permitData||[]).filter(r=>r.status==='Active').length, 0);
+  const keysCount = sites.reduce((n,s) => n + (s.keysData||[]).filter(r=>r.status==='Out').length, 0);
+  const lostCount = sites.reduce((n,s) => n + (s.lostPropertyData||s.lostData||[]).filter(r=>r.status && r.status!=='Returned'&&r.status!=='Claimed').length, 0);
+
+  const setTile = (countId, tileId, count, activeColor, flashOnActive) => {
+    const el   = document.getElementById(countId);
+    const tile = document.getElementById(tileId);
+    if (el)   { el.textContent = count; el.style.color = count > 0 ? activeColor : 'var(--dk-text3)'; }
+    if (tile && flashOnActive && count > 0) tile.style.animation = 'commsPulse 1.5s infinite';
+    else if (tile) tile.style.animation = '';
+  };
+  setTile('ov-isolations-count','ov-isolations-tile', isoCount,  '#f59e0b', true);
+  setTile('ov-permits-count',   'ov-permits-tile',   permCount, '#378add', true);
+  setTile('ov-keys-count',      'ov-keys-tile',      keysCount, '#8b5cf6', true);
+  setTile('ov-lost-count',      'ov-lost-tile',      lostCount, '#ec4899', true);
+
+  // ── Equipment faults ───────────────────────────────────────────────────────
+  const faultCount = sites.reduce((n,s) => n + (s.eqData||[]).filter(r=>r.fault&&r.fault.trim()).length, 0);
+  const faultSub   = document.getElementById('ov-faults-sub');
+  const faultBadge = document.getElementById('ov-faults-badge');
+  if (faultSub)   faultSub.textContent   = faultCount > 0 ? `${faultCount} active fault${faultCount!==1?'s':''}` : 'No active faults';
+  if (faultBadge) faultBadge.style.display = faultCount > 0 ? 'block' : 'none';
+}
+
+function updateCommsNavBadge() {
+  // Count unread messages that are from management OR flagged for manager attention
+  let unread = 0;
+  sites.forEach(s => {
+    (s.commsLog||[])
+      .filter(m => m.fromManager || m.forManager)
+      .forEach(m => { if ((m.acknowledgements||[]).length === 0) unread++; });
+  });
+  const badge = document.getElementById('ov-comms-badge');
+  if (badge) badge.style.display = unread > 0 ? 'inline-block' : 'none';
+}
+
 async function fetchSiteFromScript(siteId) {
   const site = sites.find(s => s.id === siteId);
   if (!site || !site.scriptUrl) return;
@@ -4160,16 +4975,22 @@ async function fetchSiteFromScript(siteId) {
     site.ppeData = d.ppeInspections      || [];
     site.aasData = d.actsAgainstSecurity || [];
     site.eqData  = d.equipment           || [];
-    site.isolationData = d.isolations    || [];
-    site.permitData    = d.permits       || [];
-    site.keysData      = d.keys          || [];
-    site.injuryData    = d.workplaceInjuries || [];
+    site.isolationData    = d.isolations    || [];
+    site.permitData       = d.permits       || [];
+    site.keysData         = d.keys          || [];
+    site.injuryData       = d.workplaceInjuries || [];
+    site.lostPropertyData = d.lostProperty  || [];
+    site.commsLog         = d.commsLog      || [];
     site.lastLoaded = new Date().toISOString();
-    if (d.siteConfig?.wufooFormId && !site.wufooFormId) {
+    if (d.siteConfig?.wufooFormId) {
       site.wufooFormId = d.siteConfig.wufooFormId;
+    } else if (d.wufooFormId) {
+      site.wufooFormId = d.wufooFormId;
     }
-    if (d.siteConfig?.maintenanceWufooFormId && !site.maintenanceWufooFormId) {
+    if (d.siteConfig?.maintenanceWufooFormId) {
       site.maintenanceWufooFormId = d.siteConfig.maintenanceWufooFormId;
+    } else if (d.maintenanceWufooFormId) {
+      site.maintenanceWufooFormId = d.maintenanceWufooFormId;
     }
     if (d.siteConfig?.poiUrl && !site.poiUrl) {
       site.poiUrl = d.siteConfig.poiUrl;
@@ -5716,6 +6537,146 @@ function openAllKeysModal() {
 }
 
 function closeAllKeysModal() { document.getElementById('all-keys-modal').style.display = 'none'; }
+
+// ── Lost Property Modal ───────────────────────────────────────────────────────
+// ── Manager Comms Acknowledge ─────────────────────────────────────────────────
+let _mgrAckId   = null;
+let _mgrAckSite = null;
+
+function openMgrCommsAck(msgId, siteCode) {
+  _mgrAckId   = msgId;
+  _mgrAckSite = siteCode;
+  document.getElementById('mgr-ack-name').value     = '';
+  document.getElementById('mgr-ack-response').value = '';
+  document.getElementById('mgr-comms-ack-modal').style.display = 'flex';
+}
+function closeMgrCommsAck() {
+  document.getElementById('mgr-comms-ack-modal').style.display = 'none';
+  _mgrAckId = null; _mgrAckSite = null;
+}
+
+async function confirmMgrCommsAck() {
+  const name     = (document.getElementById('mgr-ack-name').value || '').trim();
+  const response = (document.getElementById('mgr-ack-response').value || '').trim();
+  if (!name) { showToast('Enter your name', 'error'); return; }
+
+  const site = sites.find(s => s.code === _mgrAckSite);
+  if (!site) { closeMgrCommsAck(); return; }
+
+  const msg = (site.commsLog||[]).find(m => m.id === _mgrAckId);
+  if (!msg) { closeMgrCommsAck(); return; }
+
+  if ((msg.acknowledgements||[]).some(a => a.initials === name)) {
+    showToast('Already acknowledged by ' + name, 'error'); closeMgrCommsAck(); return;
+  }
+
+  if (!msg.acknowledgements) msg.acknowledgements = [];
+  msg.acknowledgements.push({
+    initials: name,
+    response: response || null,
+    time: new Date().toLocaleString('en-AU',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}),
+    fromManager: true,
+  });
+  msg.updatedAt = new Date().toISOString();
+
+  // Post the updated commsLog entry to the cloud
+  const btn = document.querySelector('[onclick="confirmMgrCommsAck()"]');
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Saving…'; }
+    const form = new URLSearchParams();
+    form.append('payload', JSON.stringify({
+      siteCode: site.code,
+      commsLog: [msg],
+      deletedIds: [],
+    }));
+    const resp   = await fetch(site.scriptUrl, { method: 'POST', body: form });
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Script error');
+    showToast('✅ Acknowledged', 'success');
+  } catch(e) {
+    // no-cors fallback
+    try {
+      await fetch(site.scriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ siteCode: site.code, commsLog: [msg], deletedIds: [] }),
+        mode: 'no-cors',
+      });
+      showToast('✅ Acknowledged (unconfirmed)', 'success');
+    } catch(e2) { showToast('Failed: ' + e2.message, 'error'); }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Acknowledge'; }
+  }
+
+  closeMgrCommsAck();
+  renderCommsPanel();
+  updateCommsNavBadge();
+}
+
+function openAllLostPropertyModal() {
+  const modal = document.getElementById('all-lostprop-modal');
+  const body  = document.getElementById('all-lostprop-body');
+  const sub   = document.getElementById('all-lostprop-sub');
+
+  const allRecords = sites.flatMap(s => (s.lostPropertyData||[]).map(r => ({...r, siteName: s.name})))
+    .sort((a,b) => {
+      const aActive = r => r.status !== 'Returned' && r.status !== 'Claimed';
+      if (aActive(a) && !aActive(b)) return -1;
+      if (!aActive(a) && aActive(b)) return 1;
+      return ((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||''));
+    });
+
+  const activeCount = allRecords.filter(r => r.status !== 'Returned' && r.status !== 'Claimed').length;
+  sub.textContent = allRecords.length + ' record' + (allRecords.length!==1?'s':'') + ' across all sites · ' + activeCount + ' unclaimed';
+
+  if (!allRecords.length) {
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--dk-text3);">No lost property records yet.</div>';
+    modal.style.display = 'flex';
+    return;
+  }
+
+  const bySite = {};
+  allRecords.forEach(r => { if(!bySite[r.siteName]) bySite[r.siteName]=[]; bySite[r.siteName].push(r); });
+
+  let html = '';
+  Object.entries(bySite).forEach(([siteName, records]) => {
+    const activeInSite = records.filter(r => r.status !== 'Returned' && r.status !== 'Claimed').length;
+    html += `<div style="margin-bottom:24px;">
+      <div style="font-size:13px;font-weight:700;color:#ec4899;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--dk-border);">
+        ${siteName} — ${records.length} record${records.length!==1?'s':''}${activeInSite ? ' · ' + activeInSite + ' unclaimed' : ''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:var(--dk-bg);">
+          <th style="padding:7px 10px;text-align:left;color:var(--dk-text2);font-weight:600;">Date</th>
+          <th style="padding:7px 10px;text-align:left;color:var(--dk-text2);font-weight:600;">Description</th>
+          <th style="padding:7px 10px;text-align:left;color:var(--dk-text2);font-weight:600;">Found By</th>
+          <th style="padding:7px 10px;text-align:left;color:var(--dk-text2);font-weight:600;">Location</th>
+          <th style="padding:7px 10px;text-align:left;color:var(--dk-text2);font-weight:600;">Status</th>
+        </tr></thead><tbody>`;
+
+    records.forEach((r, i) => {
+      const parts   = (r.date||'').split('-');
+      const dateStr = parts[2] ? parts[2]+'/'+parts[1]+'/'+parts[0] : r.date||'—';
+      const isClaimed = r.status === 'Returned' || r.status === 'Claimed';
+      const statusHtml = isClaimed
+        ? `<span style="color:#5DCAA5;font-weight:600;">✓ ${r.status||'Claimed'}</span>`
+        : `<span style="color:#ec4899;font-weight:600;">🎒 Unclaimed</span>`;
+      const bg = i%2===0 ? 'background:var(--dk-bg2);' : '';
+      html += `<tr style="${bg}border-bottom:1px solid var(--dk-border);">
+        <td style="padding:8px 10px;color:var(--dk-text);white-space:nowrap;">${dateStr} ${r.time||''}</td>
+        <td style="padding:8px 10px;color:var(--dk-text);font-weight:600;">${r.description||r.item||'—'}</td>
+        <td style="padding:8px 10px;color:var(--dk-text2);">${r.foundBy||r.officer||'—'}</td>
+        <td style="padding:8px 10px;color:var(--dk-text2);">${r.location||'—'}</td>
+        <td style="padding:8px 10px;">${statusHtml}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+  });
+
+  body.innerHTML = html;
+  modal.style.display = 'flex';
+}
+function closeAllLostPropertyModal() { document.getElementById('all-lostprop-modal').style.display = 'none'; }
 
 function openKeysFromModal(recordId, siteId) {
   const modal = document.getElementById('all-keys-modal');
@@ -7302,7 +8263,7 @@ async function runBatchReports() {
     if (stat) stat.textContent = 'Generating: '+site.name+' — '+month+' ('+(done+1)+' of '+selectedSites.length+')';
     if (bar)  bar.style.width = Math.round((done/selectedSites.length)*100)+'%';
     
-    const allData = (site.data||[]).filter(r => !isExcluded(r.type, r.siteCode));
+    const allData = getReportData(site);
     try { buildPDFReport(site, allData, month, ''); } catch(e) { console.error(e); }
     done++;
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -7896,6 +8857,84 @@ function closeEQPdfModal() {
   const modal = document.getElementById('eq-pdf-modal');
   if (modal) modal.style.display = 'none';
 }
+function generateComparisonPDF() {
+  const site = getActiveSite();
+  const today = new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'long',year:'numeric'});
+  const siteName = site?.name || 'All Sites';
+
+  const histMeta = document.getElementById('historical-meta')?.outerHTML || '';
+  const histTbl  = (document.getElementById('historical-table')?.outerHTML || '')
+    .replace(/min-width:\s*[\d.]+px;?/gi, '')
+    .replace(/width:\s*100%;?/gi, '');
+  const emgWrap  = document.getElementById('emergency-table-wrap')?.innerHTML || '';
+
+  if (!histTbl.includes('<tr')) { showToast('No comparison data to export','error'); return; }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Centre Incidents Comparison — ${siteName}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#1a2035;background:#fff;padding:18mm 14mm;}
+.cover-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:3px solid #1a3a6b;}
+.cover-logo{background:#1a3a6b;color:#c9973a;font-weight:800;font-size:16px;letter-spacing:3px;padding:5px 12px;border-radius:4px;}
+.cover-title{font-size:17px;font-weight:800;color:#1a3a6b;}
+.cover-sub{font-size:11px;color:#64748b;margin-top:2px;}
+.cover-date{font-size:11px;color:#64748b;text-align:right;}
+.section-title{font-size:14px;font-weight:800;color:#1a3a6b;margin:18px 0 8px;padding-bottom:5px;border-bottom:2px solid #1a3a6b;}
+.meta{font-size:10px;color:#64748b;margin-bottom:10px;}
+table{width:100%;border-collapse:collapse;font-size:10px;white-space:nowrap;}
+th{background:#1a3a6b;color:#fff;padding:5px 7px;font-size:9.5px;font-weight:700;text-align:right;border:1px solid #0d2654;}
+th:first-child{text-align:left;}
+td{padding:4px 7px;border:1px solid #d0d7e3;text-align:right;}
+td:first-child{text-align:left;font-weight:600;color:#1a2035;}
+tr:nth-child(even){background:#f5f7fa;}
+tr.sec-hdr td{background:#e8edf5;font-weight:700;font-size:9px;letter-spacing:0.07em;text-transform:uppercase;color:#1a3a6b;}
+tr.grand td{background:#1a3a6b;color:#fff;font-weight:700;}
+tr.sub-row td{background:#eef2fb;font-weight:600;}
+.badge-up{background:#fef2f2;color:#dc2626;padding:1px 5px;border-radius:3px;}
+.badge-dn{background:#f0fdf4;color:#15803d;padding:1px 5px;border-radius:3px;}
+.badge-z{background:#f1f5f9;color:#64748b;padding:1px 5px;border-radius:3px;}
+.ibadge{background:#eff6ff;color:#1d4ed8;padding:1px 5px;border-radius:3px;}
+.ah{background:#dbeafe;color:#1d4ed8;}
+@media print{@page{size:A3 landscape;margin:12mm 10mm;} body{padding:0;} .no-break{page-break-inside:avoid;}}
+</style>
+</head><body>
+<div class="cover-hdr">
+  <div>
+    <div class="cover-logo">AMS</div>
+  </div>
+  <div style="flex:1;margin-left:14px;">
+    <div class="cover-title">Centre Incidents Comparison — Historical</div>
+    <div class="cover-sub">${siteName}</div>
+  </div>
+  <div class="cover-date">Generated: ${today}</div>
+</div>
+<div class="meta" id="hist-meta-block">${histMeta}</div>
+<div id="hist-tbl-wrap">${histTbl}</div>
+${emgWrap ? `<div class="section-title" style="margin-top:24px;">Notable Incidents</div><div>${emgWrap}</div>` : ''}
+<script>
+// Auto-fit font size to page width (A3 landscape ≈ 390mm usable)
+window.addEventListener('load', function() {
+  var wrap = document.getElementById('hist-tbl-wrap');
+  var tbl  = wrap ? wrap.querySelector('table') : null;
+  if (!tbl) return;
+  var fs = 10;
+  tbl.style.fontSize = fs + 'px';
+  for (var i = 0; i < 8 && tbl.scrollWidth > document.body.scrollWidth + 2; i++) {
+    fs -= 0.5;
+    tbl.style.fontSize = fs + 'px';
+  }
+  setTimeout(function(){ window.print(); }, 400);
+});
+<\/script>
+</body></html>`;
+
+  const w = window.open('','_blank');
+  if (!w) { showToast('Allow pop-ups to export PDF','error'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
 function generateEQPdf() {
   const from   = document.getElementById('eq-pdf-from')?.value;
   const to     = document.getElementById('eq-pdf-to')?.value;
@@ -7953,14 +8992,14 @@ function generateEQPdf() {
 }
 
 // ══ THEME TOGGLE ════════════════════════════════════════════════════════════
-function applyTheme(light) {
-  document.body.classList.toggle('light-mode', light);
+function applyTheme(dark) {
+  document.body.classList.toggle('dark-mode', dark);
   const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = light ? '🌙' : '☀️';
-  localStorage.setItem('ams_theme', light ? 'light' : 'dark');
+  if (btn) btn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('ams_theme', dark ? 'dark' : 'light');
 }
 function toggleTheme() {
-  applyTheme(!document.body.classList.contains('light-mode'));
+  applyTheme(!document.body.classList.contains('dark-mode'));
 }
 
 // ══ HELPER ════════════════════════════════════════════════════════════════════
@@ -7982,7 +9021,7 @@ function saveHandleToIDB(id, handle) {
 }
 
 // Apply saved theme on load
-(function() { if (localStorage.getItem('ams_theme') === 'light') applyTheme(true); })();
+(function() { if (localStorage.getItem('ams_theme') === 'dark') applyTheme(true); })();
 
 
 // ══ HISTORICAL DATA ENTRY ════════════════════════════════════════════════════
@@ -9048,6 +10087,44 @@ function switchAdminTab(tab) {
       </div>
     </div>
     <div style="overflow-y:auto;padding:20px;" id="all-keys-body"></div>
+  </div>
+</div>
+
+<!-- Manager Comms Acknowledge modal -->
+<div id="mgr-comms-ack-modal" onclick="if(event.target.id==='mgr-comms-ack-modal')closeMgrCommsAck()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--dk-bg2);border-radius:14px;width:100%;max-width:480px;border:1px solid var(--dk-border);">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--dk-border);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:16px;font-weight:700;color:var(--dk-text);">✅ Acknowledge Message</div>
+      <button onclick="closeMgrCommsAck()" style="background:none;border:none;color:var(--dk-text3);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:20px 22px;">
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:var(--dk-text3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Your Name <span style="color:#ef4444;">*</span></label>
+        <input type="text" id="mgr-ack-name" placeholder="e.g. Centre Manager" style="width:100%;background:var(--dk-bg3);border:1px solid var(--dk-border2);color:var(--dk-text);padding:10px 14px;border-radius:8px;font-size:14px;outline:none;">
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="font-size:11px;font-weight:700;color:var(--dk-text3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Response / Outcome <span style="color:var(--dk-text3);font-weight:400;">(optional)</span></label>
+        <textarea id="mgr-ack-response" placeholder="e.g. Noted — will follow up with the contractor directly." style="width:100%;background:var(--dk-bg3);border:1px solid var(--dk-border2);color:var(--dk-text);padding:10px 14px;border-radius:8px;font-size:14px;outline:none;resize:vertical;min-height:90px;line-height:1.5;"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeMgrCommsAck()" style="flex:1;background:var(--dk-bg3);border:1px solid var(--dk-border2);color:var(--dk-text2);padding:11px;border-radius:8px;font-size:14px;cursor:pointer;">Cancel</button>
+        <button onclick="confirmMgrCommsAck()" style="flex:2;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.4);color:#86efac;padding:11px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">✅ Acknowledge</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lost Property modal -->
+<div id="all-lostprop-modal" onclick="if(event.target===this)closeAllLostPropertyModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--dk-bg2);border-radius:14px;width:100%;max-width:960px;max-height:90vh;display:flex;flex-direction:column;border:1px solid var(--dk-border);">
+    <div style="padding:18px 24px;border-bottom:1px solid var(--dk-border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:17px;font-weight:700;color:var(--dk-text);">🎒 Lost Property Register — All Sites</div>
+        <div style="font-size:12px;color:var(--dk-text3);margin-top:2px;" id="all-lostprop-sub">Loading...</div>
+      </div>
+      <button onclick="closeAllLostPropertyModal()" class="dk-btn">Close</button>
+    </div>
+    <div style="overflow-y:auto;padding:20px;" id="all-lostprop-body"></div>
   </div>
 </div>
 
